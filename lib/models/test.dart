@@ -63,7 +63,8 @@ class _UploadImageScreenState extends State<UploadImageScreen> {
       );
     } finally {
       setState(() {
-        _isUploading = false;
+        _isUploading = true;
+        // _isUploading = false; true
       });
     }
   }
