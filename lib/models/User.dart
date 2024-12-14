@@ -30,7 +30,7 @@ class User {
         password: json["password"],
         email: json["email"],
         phoneNumber: json["phoneNumber"],
-        role: json["role"],
+        role: Role.fromJson(json["role"]),
         status: json["status"],
         image: json["image"]);
   }
@@ -42,7 +42,7 @@ class User {
         "password": password,
         "email": email,
         "phoneNumber": phoneNumber,
-        "role": role,
+        "role": role.toJson(),
         "status": status,
         "image": image
       };

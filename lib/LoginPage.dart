@@ -30,20 +30,26 @@ class _LoginPage extends State<LoginPage> {
       apiService
           .login(usernameController.text, passwordController.text)
           .then((_user) {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Layout(user: _user)));
-      }).catchError((onError) {
-        // Hiển thị thông báo lỗi với thiết kế đẹp hơn
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => Layout(user: _user)));
+      }).catchError((error) {
+        String errorMessage;
+        if (error.toString().contains('Invalid username or password')) {
+          errorMessage = 'Sai tài khoản hoặc mật khẩu!';
+        } else {
+          errorMessage = 'Đã xảy ra lỗi. Vui lòng thử lại!';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.error, color: Colors.white),
-                SizedBox(width: 10),
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Sai tài khoản hoặc mật khẩu!',
-                    style: TextStyle(fontSize: 16),
+                    errorMessage,
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
               ],
@@ -56,7 +62,7 @@ class _LoginPage extends State<LoginPage> {
             ),
           ),
         );
-        print('has error $onError');
+        print('Error occurred: $error');
       });
     }
   }

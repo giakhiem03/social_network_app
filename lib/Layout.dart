@@ -21,15 +21,7 @@ class _Layout extends State<Layout> {
   final _frmSearch = GlobalKey<ScaffoldState>();
   TextEditingController _searchInput = TextEditingController();
 
-  final List<Widget> _contentWidgets = [
-    const HomePage(),
-    const Center(child: Text('0', style: TextStyle(fontSize: 24))),
-    const Center(child: Text('1', style: TextStyle(fontSize: 24))),
-    const Center(child: Text('2', style: TextStyle(fontSize: 24))),
-    const Center(child: Text('3', style: TextStyle(fontSize: 24))),
-    const Center(child: Text('4', style: TextStyle(fontSize: 24))),
-    const Center(child: Text('Settings Content', style: TextStyle(fontSize: 24))),
-  ];
+
 
   int _selectedIndex = 0;
 
@@ -39,6 +31,15 @@ class _Layout extends State<Layout> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _contentWidgets = [
+      HomePage(user: widget.user,),
+      const Center(child: Text('0', style: TextStyle(fontSize: 24))),
+      const Center(child: Text('1', style: TextStyle(fontSize: 24))),
+      const Center(child: Text('2', style: TextStyle(fontSize: 24))),
+      const Center(child: Text('3', style: TextStyle(fontSize: 24))),
+      const Center(child: Text('4', style: TextStyle(fontSize: 24))),
+      const Center(child: Text('Settings Content', style: TextStyle(fontSize: 24))),
+    ];
     if (!widget.user.status) {
       Future.microtask(() {
         Navigator.pushReplacement(

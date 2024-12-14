@@ -43,7 +43,7 @@ class _UploadImageScreenState extends State<UploadImageScreen> {
     try {
       final uri = Uri.parse('http://10.0.2.2:8080/api/users/updateAvatar');
       final request = http.MultipartRequest('POST', uri)
-        ..fields['userId'] = '6' // Thay bằng ID người dùng thực tế
+        ..fields['userId'] = '14' // Thay bằng ID người dùng thực tế
         ..files.add(await http.MultipartFile.fromPath('image', _selectedImage!.path));
 
       final response = await request.send();
@@ -115,7 +115,7 @@ class _UploadImageScreenState extends State<UploadImageScreen> {
             ),
             ElevatedButton(
               onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>Test2(userId: 6)));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>Test2(userId: 14)));
               },
               child: Text('Qua test 2'),
             ),

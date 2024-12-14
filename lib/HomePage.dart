@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:social_network_project/models/User.dart';
 
 import 'PostPage.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final User user;
+  const HomePage({required this.user,super.key});
 
   @override
   _HomePage createState() => _HomePage();
@@ -32,7 +34,7 @@ class _HomePage extends State<HomePage> {
                   //sử dụng GestureDetector or InkWell
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const PostPage(),));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => PostPage(user: widget.user),));
                     },
                     child: const Text('Hãy chia sẽ cảm xúc của bạn!',style: TextStyle(color: Colors.white38, fontSize: 15),),
                   )

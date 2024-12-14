@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:social_network_project/DTO/UserDTO.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
 
 import '../models/Post.dart';
 import '../models/User.dart';
@@ -68,6 +69,7 @@ class ApiService {
       },
       body: jsonEncode(user.toJson())
     );
+    print(response.statusCode);
     if(response.statusCode == 200){
       return User.fromJson(jsonDecode(response.body));
     }else{
@@ -161,33 +163,94 @@ class ApiService {
     return pickedFile;
   }
 
-  Future<void> uploadPost(Post post, File postImage) async {
-    final uri = Uri.parse('$baseUrl/posts');
+  //
+  // Future<void> uploadPost(Post post, File? postImage) async {
+  //   print(post.toJson());  // In ra dữ liệu JSON của bài viết
+  //
+  //   final uri = Uri.parse('$baseUrl/posts');
+  //   var request = http.MultipartRequest('POST', uri)
+  //     ..fields['post'] = jsonEncode(post.toJson());
+  //
+  //   // Chỉ thêm file nếu postImage không phải null
+  //   if (postImage != null) {
+  //     request.files.add(await http.MultipartFile.fromPath(
+  //       'postImage',
+  //       postImage.path,
+  //     ));
+  //   }
+  //
+  //   try {
+  //     var response = await request.send();
+  //
+  //     if (response.statusCode == 200) {
+  //       print('Upload thành công!');
+  //       // Handle successful upload if needed
+  //     } else {
+  //       print('Upload thất bại: ${response.statusCode}');
+  //       throw Exception('Failed to upload post');
+  //     }
+  //   } catch (e) {
+  //     print('Lỗi khi upload: $e');
+  //     throw e; // Rắc rối xảy ra thì ném ra exception để xử lý tiếp theo
+  //   }
+  // }
 
-    // Tạo request multipart
-    var request = http.MultipartRequest('POST', uri)
-      ..fields['post'] = jsonEncode(post.toJson()) // Gửi Post dưới dạng JSON
-      ..files.add(await http.MultipartFile.fromPath(
-        'postImage', // Tên field của file ảnh
-        postImage.path,
-      ));
-
+  Future<void> uploadPost(Post post, File? postImage) async {
     try {
-      // Gửi request
-      var response = await request.send();
 
-      // Kiểm tra phản hồi
-      if (response.statusCode == 200) {
-        print('Upload thành công!');
-      } else {
-        print('Upload thất bại: ${response.statusCode}');
-        throw Exception('Failed to upload post');
+      // Gọi API 1: Upload hình ảnh nếu có
+      if (postImage != null) {
+        final imageResponse = await uploadPostImage(postImage);
+        if (imageResponse.statusCode == 200) {
+            post.postImage = imageResponse.body;
+            print("Up load ảnh thành công");// nhận đường dẫn ảnh từ response API upload
+        } else {
+          print('Failed to upload image: ${imageResponse.statusCode}');
+          throw Exception('Failed to upload image');
+        }
       }
+      // Gọi API 2: Tạo bài viết với đường dẫn hình ảnh (nếu có)
+      await uploadPostContent(post);
+
     } catch (e) {
       print('Lỗi khi upload: $e');
-      throw e;
+      throw e; // Rắc rối xảy ra thì ném ra exception để xử lý tiếp theo
     }
   }
 
+  Future<http.Response> uploadPostImage(File postImage) async {
+    var uri = Uri.parse('$baseUrl/posts/image');
+    var request = http.MultipartRequest('POST', uri)
+      ..files.add(await http.MultipartFile.fromPath('postImage', postImage.path));
+
+    var response = await request.send();
+    if (response.statusCode == 200) {
+
+      // Đọc response để lấy tên file hoặc đường dẫn hình ảnh từ server
+      return http.Response.fromStream(response);
+    } else {
+      throw Exception('Failed to upload image: ${response.statusCode}');
+    }
+  }
+
+  Future<void> uploadPostContent(Post post) async {
+    var uri = Uri.parse('$baseUrl/posts');
+    final response = await http.post(
+      uri,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(post.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      print(response.body);
+      print('Upload thành công!');
+      // Handle successful upload if needed
+    } else {
+      print('Upload thất bại: ${response.statusCode}');
+      throw Exception('Failed to upload post');
+    }
+  }
 
 }

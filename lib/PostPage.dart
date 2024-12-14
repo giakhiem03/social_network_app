@@ -3,11 +3,16 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
+import 'package:social_network_project/models/Post.dart';
+
+import 'models/User.dart';
 
 class PostPage extends StatefulWidget {
-  const PostPage({super.key});
+  final User user;
+  const PostPage({required this.user,super.key});
 
   @override
   _PostPage createState() => _PostPage();
@@ -15,6 +20,7 @@ class PostPage extends StatefulWidget {
 
 class _PostPage extends State<PostPage> {
   final TextEditingController _PostInput = TextEditingController();
+
   File? _selectedImage;
   bool valueExist = false;
   ApiService apiService = new ApiService();
@@ -30,6 +36,25 @@ class _PostPage extends State<PostPage> {
       });
     }
   }
+  // Tạo Post model để ánh xạ dữ liệu vào
+
+  //Hàm upload bài post
+  void UploadPost() {
+    Post post = Post(
+      user: widget.user,
+      postedTime: DateTime.now(),
+      caption: _PostInput.text,
+    );
+    apiService.uploadPost(post, _selectedImage).then((response){
+      setState(() {
+        _PostInput.clear();
+        _selectedImage = null;
+      });
+    }).catchError((error){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Đã xảy ra lỗi khi đăng bài!")));
+      print("Lỗi khi upload: $error");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +64,7 @@ class _PostPage extends State<PostPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: Colors.white,
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Row(
           children: [
@@ -56,9 +79,10 @@ class _PostPage extends State<PostPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Icon(
-                    Icons.send,
-                    color: valueExist ? Colors.orangeAccent : Colors.white54,
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    color: valueExist || _selectedImage != null ? Colors.orangeAccent : Colors.white54,
+                    onPressed: valueExist || _selectedImage != null ? UploadPost : null,
                   )
                 ],
               ),
