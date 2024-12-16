@@ -30,14 +30,15 @@ class _LoginPage extends State<LoginPage> {
       apiService
           .login(usernameController.text, passwordController.text)
           .then((_user) {
-        Navigator.push(context,
+        Navigator.push(
+            context,
             MaterialPageRoute(builder: (context) => Layout(user: _user)));
       }).catchError((error) {
         String errorMessage;
         if (error.toString().contains('Invalid username or password')) {
           errorMessage = 'Sai tài khoản hoặc mật khẩu!';
         } else {
-          errorMessage = 'Đã xảy ra lỗi. Vui lòng thử lại!';
+          errorMessage = 'Đã xảy ra lỗi. Vui lòng thử lại! $error';
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -66,6 +67,7 @@ class _LoginPage extends State<LoginPage> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

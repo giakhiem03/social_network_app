@@ -4,15 +4,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
+import 'package:social_network_project/Layout.dart';
 import 'package:social_network_project/models/Post.dart';
 
 import 'models/User.dart';
 
 class PostPage extends StatefulWidget {
   final User user;
-  const PostPage({required this.user,super.key});
+
+  const PostPage({required this.user, super.key});
 
   @override
   _PostPage createState() => _PostPage();
@@ -36,25 +39,38 @@ class _PostPage extends State<PostPage> {
       });
     }
   }
+
   // Tạo Post model để ánh xạ dữ liệu vào
 
   //Hàm upload bài post
-  void UploadPost() {
-    Post post = Post(
-      user: widget.user,
-      postedTime: DateTime.now(),
-      caption: _PostInput.text,
-    );
-    apiService.uploadPost(post, _selectedImage).then((response){
+  void UploadPost() async {
+    try {
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('HH:mm dd-MM-yyyy').format(now);
+      Post post = Post(
+        userUpLoad: widget.user,
+        postedTime: formattedDate,
+        caption: _PostInput.text,
+      );
+
+      await apiService.uploadPost(post, _selectedImage);
+
       setState(() {
         _PostInput.clear();
         _selectedImage = null;
       });
-    }).catchError((error){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Đã xảy ra lỗi khi đăng bài!")));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Đăng bài thành công!")));
+      Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => Layout(user: widget.user)));
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Đã xảy ra lỗi khi đăng bài!")));
       print("Lỗi khi upload: $error");
-    });
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -81,8 +97,12 @@ class _PostPage extends State<PostPage> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.send),
-                    color: valueExist || _selectedImage != null ? Colors.orangeAccent : Colors.white54,
-                    onPressed: valueExist || _selectedImage != null ? UploadPost : null,
+                    color: valueExist || _selectedImage != null
+                        ? Colors.orangeAccent
+                        : Colors.white54,
+                    onPressed: valueExist || _selectedImage != null
+                        ? UploadPost
+                        : null,
                   )
                 ],
               ),
@@ -121,28 +141,47 @@ class _PostPage extends State<PostPage> {
             // Hiển thị ảnh nếu có chọn
             _selectedImage != null
                 ? SizedBox(
-              height: 380, // Độ cao cố định
-              width: double.infinity, // Độ rộng toàn màn hình
-              child: Image.file(
-                _selectedImage!,
-                fit: BoxFit.contain, // Lấp đầy khung với tỷ lệ ảnh gốc
-              ),
-            )
+                    height: 380, // Độ cao cố định
+                    width: double.infinity, // Độ rộng toàn màn hình
+                    child: Image.file(
+                      _selectedImage!,
+                      fit: BoxFit.contain, // Lấp đầy khung với tỷ lệ ảnh gốc
+                    ),
+                  )
                 : Container(),
             // Các nút chọn ảnh
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => _pickImage(ImageSource.gallery),
-              icon: const Icon(Icons.photo_library),
-              label: const Text("Chọn ảnh từ thư viện"),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton.icon(
-              onPressed: () => _pickImage(ImageSource.camera),
-              icon: const Icon(Icons.camera_alt),
-              label: const Text("Chụp ảnh"),
-            ),
-            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue, // Set the background color
+                    borderRadius: BorderRadius.circular(
+                        8.0), // Optional: Adds rounded corners
+                  ),
+                  child: IconButton(
+                    onPressed: () => _pickImage(ImageSource.gallery),
+                    icon: const Icon(Icons.photo_library),
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 20,),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue, // Set the background color
+                    borderRadius: BorderRadius.circular(
+                        8.0), // Optional: Adds rounded corners
+                  ),
+                  child: IconButton(
+                    onPressed: () => _pickImage(ImageSource.camera),
+                    icon: const Icon(Icons.camera_alt),
+                    color: Colors.white, // Icon color
+                  ),
+                ),
+                const SizedBox(width: 30,)
+              ],
+            )
           ],
         ),
       ),

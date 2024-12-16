@@ -195,9 +195,9 @@ class ApiService {
   //   }
   // }
 
+  // Gọi API upload Post
   Future<void> uploadPost(Post post, File? postImage) async {
     try {
-
       // Gọi API 1: Upload hình ảnh nếu có
       if (postImage != null) {
         final imageResponse = await uploadPostImage(postImage);
@@ -250,6 +250,32 @@ class ApiService {
     } else {
       print('Upload thất bại: ${response.statusCode}');
       throw Exception('Failed to upload post');
+    }
+  }
+
+  //Gọi API lấy tất cả bài post
+  Future<List<Post>> getAllPosts() async {
+     var uri = Uri.parse('$baseUrl/getAllPosts');
+     final response = await http.get(uri);
+     if(response.statusCode == 200){
+       List<dynamic> posts = jsonDecode(response.body);
+       return posts.map((post) => Post.fromJson(post)).toList();
+     } else {
+       throw Exception('Failed to get All Posts');
+     }
+  }
+
+  //Gọi API khi User click tim
+  Future<void> toggleLike(int postId, int userId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/$postId/toggle-like/$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      print('Successfully toggled like');
+      // Cập nhật UI sau khi API gọi thành công
+    } else {
+      print('Failed to toggle like');
     }
   }
 
