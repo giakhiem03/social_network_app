@@ -7,10 +7,10 @@ import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
-import 'package:social_network_project/Layout.dart';
 import 'package:social_network_project/models/Post.dart';
 
-import 'models/User.dart';
+import '../models/User.dart';
+import 'Layout.dart';
 
 class PostPage extends StatefulWidget {
   final User user;

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:social_network_project/LoginPage.dart';
 import 'package:social_network_project/models/Role.dart';
 import 'package:social_network_project/models/User.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'ApiService/ApiService.dart';
+import '../ApiService/ApiService.dart';
+import 'LoginPage.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

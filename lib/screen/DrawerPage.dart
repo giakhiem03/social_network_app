@@ -5,10 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:social_network_project/models/DefaultAvatar.dart';
-
-import 'HomePage.dart';
+import '../models/User.dart';
 import 'LoginPage.dart';
-import 'models/User.dart';
 
 class DrawerPage extends StatefulWidget {
   final Function(int) onItemSelected;
@@ -107,7 +105,7 @@ class _DrawerPage extends State<DrawerPage> {
                     Icons.people,
                     color: Colors.orangeAccent,
                   ),
-                  title: Text('Bạn bè',
+                  title: Text('Lời mời kết bạn',
                       style:
                       GoogleFonts.dynaPuff(color: Colors.orangeAccent)),
                   onTap: () {

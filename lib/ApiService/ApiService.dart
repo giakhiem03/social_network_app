@@ -6,9 +6,12 @@ import 'package:http/http.dart' as http;
 import 'package:social_network_project/DTO/UserDTO.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:social_network_project/models/Comments.dart';
+import 'package:social_network_project/models/Friends.dart';
 
 import '../models/Post.dart';
 import '../models/User.dart';
+import '../models/Notifications.dart';
 
 class ApiService {
   final String baseUrl = '${getBaseUrl()}/api/users';
@@ -243,6 +246,7 @@ class ApiService {
       body: jsonEncode(post.toJson()),
     );
 
+
     if (response.statusCode == 200) {
       print(response.body);
       print('Upload thành công!');
@@ -266,16 +270,136 @@ class ApiService {
   }
 
   //Gọi API khi User click tim
-  Future<void> toggleLike(int postId, int userId) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/$postId/toggle-like/$userId'),
-    );
+  Future<Post?> toggleLike(int postId, int userId) async {
+     try {
+       final response = await http.post(
+         Uri.parse('$baseUrl/$postId/toggle-like/$userId'),
+       );
 
+       if (response.statusCode == 200) {
+         print('Successfully toggled like');
+         Post post = Post.fromJson(jsonDecode(response.body));
+         return post; // Parse từ body (string) sang integer
+         // Cập nhật UI sau khi API gọi thành công
+       } else {
+         print('Failed to toggle like');
+         return null;
+       }
+     }catch (e) {
+        print('Error occurred while toggling like: $e');
+        return null;
+      }
+  }
+
+  Future<List<Comments>> getAllCmts() async {
+    try {
+      var uri = Uri.parse('$baseUrl/comments');
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        List jsonData = json.decode(response.body);
+        return jsonData.map((item) => Comments.fromJson(item)).toList();
+      } else {
+        throw Exception('Failed to load comments');
+      }
+    } catch (e) {
+      throw Exception('Failed to load comments: $e');
+    }
+  }
+
+  Future<void> createCmts(Comments comment) async {
+    var uri = Uri.parse('$baseUrl/createCmt');
+    final response = await http.post(
+      uri,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(comment.toJson()),
+    );
     if (response.statusCode == 200) {
-      print('Successfully toggled like');
+      print('Successfully comment');
       // Cập nhật UI sau khi API gọi thành công
     } else {
-      print('Failed to toggle like');
+      print('Failed to comment');
+    }
+  }
+
+  Future<List<Notifications>> getAllNotes() async{
+    try {
+      var uri = Uri.parse('$baseUrl/notifications');
+      final response = await http.get(uri);
+      if(response.statusCode == 200) {
+        List jsonData = json.decode(response.body);
+        return jsonData.map((note)=> Notifications.fromJson(note)).toList();
+      } else {
+        throw Exception('Failed to load notes');
+      }
+    } catch(e) {
+      throw Exception('Failed to load notes catch');
+    }
+
+  }
+
+  Future<List<User>> searchByName(String name) async {
+     try {
+       var uri = Uri.parse('$baseUrl/search/$name');
+       final response = await http.get(uri);
+       if(response.statusCode == 200) {
+         List jsonData = json.decode(response.body);
+         return jsonData.map((user)=> User.fromJson(user)).toList();
+       } else {
+         throw Exception('Failed to load notes');
+       }
+     }catch(e){
+       throw Exception('Failed to load users catch');
+     }
+  }
+
+  Future<Friends> addFriend(Friends friend) async {
+    try {
+      var uri = Uri.parse('$baseUrl/addFriend');
+      final response = await http.post(
+        uri,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(friend.toJson()),
+      );
+      if(response.statusCode == 200) {
+        return Friends.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Failed to load notes');
+      }
+    }catch(e){
+      throw Exception('Failed to load users catch');
+    }
+  }
+
+  Future<List<Friends>> getAllFriends() async {
+    try {
+      var uri = Uri.parse('$baseUrl/getFriends');
+      final response = await http.get(uri);
+      if(response.statusCode == 200) {
+        List jsonData = json.decode(response.body);
+        return jsonData.map((friend)=> Friends.fromJson(friend)).toList();
+      } else {
+        throw Exception('Failed to load friends');
+      }
+    }catch(e){
+      throw Exception('Failed to load friends catch');
+    }
+  }
+
+  Future<void> removeFriend(int friendId) async{
+    try {
+      var uri = Uri.parse('$baseUrl/removeFriend/$friendId');
+      final response = await http.delete(uri);
+      if(response.statusCode == 200) {
+        print("remove successful");
+      } else {
+        throw Exception('Failed to remove friend');
+      }
+    }catch(e){
+    throw Exception('Failed to remove friend catch');
     }
   }
 

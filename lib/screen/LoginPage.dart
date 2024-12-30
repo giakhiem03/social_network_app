@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
-import 'package:social_network_project/Layout.dart';
+import 'Layout.dart';
 import 'RegisterPage.dart';
 
 class LoginPage extends StatefulWidget {

@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:social_network_project/DrawerPage.dart';
-import 'package:social_network_project/HomePage.dart';
-import 'package:social_network_project/test2.dart';
-import 'LoginPage.dart';
-import 'models/test.dart';
+import 'package:provider/provider.dart';
+import 'package:social_network_project/screen/HomePage.dart';
+import 'package:social_network_project/screen/ListSearchPage.dart';
+import 'screen/LoginPage.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(create: (_) => SearchProvider())
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

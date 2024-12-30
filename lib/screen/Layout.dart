@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:social_network_project/DrawerPage.dart';
-import 'package:social_network_project/HomePage.dart';
-import 'package:social_network_project/LoginPage.dart';
+import 'package:social_network_project/screen/DrawerPage.dart';
+import 'package:social_network_project/screen/ListSearchPage.dart';
 
-import 'models/User.dart';
+import '../models/User.dart';
+import 'HomePage.dart';
+import 'LoginPage.dart';
+import 'NotificationPage.dart';
 // import 'package:badges/badges.dart' as badges;
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 // import 'package:flutter_feather_icons/flutter_feather_icons.dart';
@@ -19,7 +21,7 @@ class _Layout extends State<Layout> {
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _frmSearch = GlobalKey<ScaffoldState>();
-  TextEditingController _searchInput = TextEditingController();
+  final TextEditingController _searchInput = TextEditingController();
 
 
 
@@ -33,7 +35,7 @@ class _Layout extends State<Layout> {
   Widget build(BuildContext context) {
     final List<Widget> _contentWidgets = [
       HomePage(user: widget.user,),
-      const Center(child: Text('0', style: TextStyle(fontSize: 24))),
+      NotificationPage(user: widget.user),
       const Center(child: Text('1', style: TextStyle(fontSize: 24))),
       const Center(child: Text('2', style: TextStyle(fontSize: 24))),
       const Center(child: Text('3', style: TextStyle(fontSize: 24))),
@@ -72,7 +74,11 @@ class _Layout extends State<Layout> {
                 },
                 decoration: InputDecoration(
                   hintText: 'Search',
-                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: IconButton(onPressed:()=>Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ListSearchPage(userSend: widget.user,name: _searchInput.text)
+                  )),
+                      icon: const Icon(Icons.search)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(50),
                       borderSide: BorderSide.none
