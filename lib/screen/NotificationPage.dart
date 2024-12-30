@@ -55,12 +55,12 @@ class _NotificationPage extends State<NotificationPage> {
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       Notifications notification = snapshot.data![index];
-                      return Container(
+                      return notification.userIdReceive.username == widget.user.username ?
+                        Container(
                         padding: const EdgeInsets.only(top: 10,bottom: 10),
                         margin: const EdgeInsets.only(bottom: 10),
                         color: Colors.blueGrey,
-                          child: notification.userIdReceive.username == widget.user.username ?
-                          Row(
+                          child: Row(
                             children: [
                               const SizedBox(width: 18),
                               CircleAvatar(
@@ -83,8 +83,8 @@ class _NotificationPage extends State<NotificationPage> {
                                 ],
                               ),
                             ],
-                          ) : Container(),
-                      );
+                          ) ,
+                      ) : Container();
                     },
                   );
                 } else {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:social_network_project/screen/HomePage.dart';
 import 'package:social_network_project/screen/ListSearchPage.dart';
+import 'package:social_network_project/screen/MessagePage.dart';
 import 'screen/LoginPage.dart';
 
 void main() {
@@ -9,7 +10,8 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => HomeProvider()),
-        ChangeNotifierProvider(create: (_) => SearchProvider())
+        ChangeNotifierProvider(create: (_) => SearchProvider()),
+        ChangeNotifierProvider(create: (_) => MessageProvider()),
       ],
       child: MyApp(),
     ),

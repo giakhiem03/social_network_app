@@ -46,6 +46,11 @@ class SearchProvider extends ChangeNotifier {
     apiService.removeFriend(friendId);
     notifyListeners(); // Thông báo cập nhật
   }
+
+  void acceptFriends(int friendId) {
+    apiService.acceptFriend(friendId);
+    notifyListeners(); // Thông báo cập nhật
+  }
 }
 
 class ListSearchPage extends StatelessWidget {
@@ -61,14 +66,14 @@ class ListSearchPage extends StatelessWidget {
         if (friend.statusRelationship == 1) {
           return Icon(Icons.cancel, color: Colors.red[300]); // Đang chờ xác nhận
         } else {
-          return const Icon(Icons.account_circle, color: Colors.green); // Đã là bạn bè
+          return const Icon(FontAwesomeIcons.userGroup, color: Colors.green); // Đã là bạn bè
         }
       } else if (friend.userIdSend.userId == user.userId &&
           friend.userIdReceive.userId == userSend.userId) {
         if (friend.statusRelationship == 1) {
           return const Icon(Icons.check, color: Colors.blue); // Đang chờ chấp nhận
         } else {
-          return const Icon(Icons.account_circle, color: Colors.green); // Đã là bạn bè
+          return const Icon(FontAwesomeIcons.userGroup, color: Colors.green); // Đã là bạn bè
         }
       }
     }
@@ -128,12 +133,14 @@ class ListSearchPage extends StatelessWidget {
                             ),
                           );
                         }
-
                         return ListView.builder(
                           itemCount: users.length,
                           itemBuilder: (context, index) {
                             User user = users[index];
                             Icon icon = getIcon(user, friends, userSend);
+                            if(user.username == userSend.username) {
+                              icon = const Icon(Icons.account_circle);
+                            }
                             return Container(
                               padding: const EdgeInsets.only(top: 10, bottom: 10),
                               margin: const EdgeInsets.only(bottom: 10),
@@ -156,7 +163,8 @@ class ListSearchPage extends StatelessWidget {
                                       if (icon.icon == Icons.add) {
                                         searchProvider.addFriends(
                                             userSend, user, 1);
-                                      } else if (icon.icon == Icons.cancel || icon.icon == Icons.account_circle) {
+                                      } else if (icon.icon == Icons.cancel ||
+                                          icon.icon == FontAwesomeIcons.userGroup) {
                                         Friends friend = friends.firstWhere(
                                               (f) =>
                                           f.userIdSend.userId ==
@@ -166,7 +174,18 @@ class ListSearchPage extends StatelessWidget {
                                         );
                                         searchProvider.cancelAddFriends(friend.id!);
                                       } else if(icon.icon == Icons.check) {
-                                        
+                                        Friends friend = friends.firstWhere(
+                                              (f) =>
+                                              (f.userIdSend.userId ==
+                                                  userSend.userId &&
+                                                  f.userIdReceive.userId ==
+                                                      user.userId) ||
+                                                  (f.userIdSend.userId ==
+                                                  user.userId &&
+                                                  f.userIdReceive.userId ==
+                                                      userSend.userId)
+                                        );
+                                        searchProvider.acceptFriends(friend.id!);
                                       }
                                     },
                                     icon: icon,

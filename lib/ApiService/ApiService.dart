@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:social_network_project/models/Comments.dart';
 import 'package:social_network_project/models/Friends.dart';
+import 'package:social_network_project/models/Message.dart';
 
 import '../models/Post.dart';
 import '../models/User.dart';
@@ -400,6 +401,57 @@ class ApiService {
       }
     }catch(e){
     throw Exception('Failed to remove friend catch');
+    }
+  }
+
+  Future<void> acceptFriend(int friendId) async{
+    try {
+      var uri = Uri.parse('$baseUrl/acceptFriend/$friendId');
+      final response = await http.put(uri);
+      if(response.statusCode == 200) {
+        print("accept successful");
+      } else {
+        throw Exception('Failed to remove friend');
+      }
+    }catch(e){
+      throw Exception('Failed to remove friend catch');
+    }
+  }
+
+  Future<List<Message>> getAllMessage() async {
+    try {
+      var uri = Uri.parse('$baseUrl/messages');
+      final response = await http.get(uri);
+      if(response.statusCode == 200) {
+        List jsonData = json.decode(response.body);
+        print("Successful");
+        return jsonData.map((message)=> Message.fromJson(message)).toList();
+      } else {
+        throw Exception('Failed to remove friend');
+      }
+    } catch(e){
+      throw Exception('Failed to remove friend catch');
+    }
+  }
+
+  Future<void> sendMessage(Message message) async {
+    try {
+      var uri = Uri.parse('$baseUrl/sendMessage');
+      final response = await http.post(
+        uri,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(message.toJson()),
+      );
+      print(response.statusCode);
+      if(response.statusCode == 200) {
+        print("Send Successful");
+      } else {
+        throw Exception('Failed to load notes');
+      }
+    }catch(e){
+      throw Exception('Failed to load users catch');
     }
   }
 

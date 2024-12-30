@@ -81,7 +81,7 @@ class _DrawerPage extends State<DrawerPage> {
                   tileColor:
                   _selectedIndex == 2 ? Colors.white : Colors.grey[800],
                   leading: const badges.Badge(
-                    badgeContent: Text('5'),
+                    badgeContent: Text(''),
                     badgeStyle: badges.BadgeStyle(
                       badgeColor: Colors.red,
                     ),

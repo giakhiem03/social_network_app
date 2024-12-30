@@ -4,8 +4,10 @@ import 'package:social_network_project/screen/DrawerPage.dart';
 import 'package:social_network_project/screen/ListSearchPage.dart';
 
 import '../models/User.dart';
+import 'FriendRequestPage.dart';
 import 'HomePage.dart';
 import 'LoginPage.dart';
+import 'ListMessagePage.dart';
 import 'NotificationPage.dart';
 // import 'package:badges/badges.dart' as badges;
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -36,9 +38,9 @@ class _Layout extends State<Layout> {
     final List<Widget> _contentWidgets = [
       HomePage(user: widget.user,),
       NotificationPage(user: widget.user),
-      const Center(child: Text('1', style: TextStyle(fontSize: 24))),
-      const Center(child: Text('2', style: TextStyle(fontSize: 24))),
-      const Center(child: Text('3', style: TextStyle(fontSize: 24))),
+      ListMessagePage(user: widget.user),
+      FriendRequestPage(user: widget.user,),
+      const Center(child: Text('4', style: TextStyle(fontSize: 24))),
       const Center(child: Text('4', style: TextStyle(fontSize: 24))),
       const Center(child: Text('Settings Content', style: TextStyle(fontSize: 24))),
     ];
@@ -54,6 +56,7 @@ class _Layout extends State<Layout> {
       child: Scaffold(
         key: _scaffoldKey,
         // Gán key cho Scaffold
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           backgroundColor: Colors.white10,
           leading: IconButton(

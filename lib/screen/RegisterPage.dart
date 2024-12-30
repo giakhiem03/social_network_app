@@ -40,6 +40,17 @@ class _RegisterPage extends State<RegisterPage> {
             MaterialPageRoute(builder: (context) => const LoginPage()));
       }).catchError((error) {
         print('Error: $error');
+        // Hiển thị SnackBar thông báo lỗi
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Tài khoản đã có người sử dụng', // Nội dung lỗi từ server
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3), // Thời gian hiển thị
+          ),
+        );
       });
     }
   }
