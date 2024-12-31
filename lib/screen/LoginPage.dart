@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
+import '../models/User.dart';
 import 'Layout.dart';
+import 'ProfilePage.dart';
 import 'RegisterPage.dart';
 
 class LoginPage extends StatefulWidget {
@@ -12,7 +15,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPage extends State<LoginPage> {
-  ApiService apiService = new ApiService();
+  ApiService apiService = ApiService();
 
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -30,9 +33,10 @@ class _LoginPage extends State<LoginPage> {
       apiService
           .login(usernameController.text, passwordController.text)
           .then((_user) {
+        Provider.of<UserProvider>(context, listen: false).setUser(_user);
         Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => Layout(user: _user)));
+            MaterialPageRoute(builder: (context) => const Layout()));
       }).catchError((error) {
         String errorMessage;
         if (error.toString().contains('Invalid username or password')) {
@@ -107,7 +111,7 @@ class _LoginPage extends State<LoginPage> {
                         child: CircleAvatar(
                           radius: 36,
                           backgroundImage:
-                              AssetImage('assets/images/header_logo.png'),
+                          AssetImage('assets/images/header_logo.png'),
                         ),
                       ),
                     ],
@@ -163,7 +167,7 @@ class _LoginPage extends State<LoginPage> {
                                       labelText: 'Tài khoản',
                                       border: OutlineInputBorder(
                                           borderRadius:
-                                              BorderRadius.circular(50),
+                                          BorderRadius.circular(50),
                                           borderSide: BorderSide.none),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: const BorderSide(
@@ -205,7 +209,7 @@ class _LoginPage extends State<LoginPage> {
                                         labelText: 'Mật khẩu',
                                         border: OutlineInputBorder(
                                             borderRadius:
-                                                BorderRadius.circular(50),
+                                            BorderRadius.circular(50),
                                             borderSide: BorderSide.none),
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: const BorderSide(
@@ -227,7 +231,7 @@ class _LoginPage extends State<LoginPage> {
                                             color: Colors.white),
                                         suffixIcon: IconButton(
                                             onPressed:
-                                                _togglePasswordVisibility,
+                                            _togglePasswordVisibility,
                                             icon: Icon(
                                               _obscureText
                                                   ? Icons.visibility
@@ -264,7 +268,7 @@ class _LoginPage extends State<LoginPage> {
                                               context,
                                               MaterialPageRoute(
                                                   builder: (context) =>
-                                                      const RegisterPage()),
+                                                  const RegisterPage()),
                                             );
                                           },
                                           child: Text(
@@ -273,7 +277,7 @@ class _LoginPage extends State<LoginPage> {
                                               fontSize: 12,
                                               color: Colors.white,
                                               decoration:
-                                                  TextDecoration.underline,
+                                              TextDecoration.underline,
                                               decorationColor: Colors.white,
                                               decorationThickness: 2.4,
                                             ),
