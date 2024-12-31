@@ -64,19 +64,39 @@ class ApiService {
     }
   }
 
-  Future<User> login(String username, String password) async {
+  Future<User> login(BuildContext context, String username, String password) async {
     LoginDTO user = LoginDTO(username: username, password: password);
-    final response = await http.post(Uri.parse('$baseUrl/login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(user.toJson())
-    );
-    if(response.statusCode == 200){
-      return User.fromJson(jsonDecode(response.body));
-    }else{
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/login'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(user.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        // If login is successful, parse the response body
+        return User.fromJson(jsonDecode(response.body));
+      } else {
+        // If login fails, show a Snackbar with an error message
+        _showSnackbar(context, 'Username or password incorrect');
+        throw Exception('Failed to login');
+      }
+    } catch (e) {
       throw Exception('Failed to login');
     }
+  }
+
+// Function to show a Snackbar
+  void _showSnackbar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 2), // Snackbar duration
+      ),
+    );
   }
 
   Future<List<User>> getAllUsers() async {

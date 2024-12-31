@@ -1,12 +1,17 @@
+import 'dart:io';
+
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
 import 'package:social_network_project/models/Comments.dart';
 import 'package:social_network_project/models/Post.dart';
 import '../models/DefaultAvatar.dart';
+import '../models/EmojiUtil.dart';
 import '../models/User.dart';
 import 'PostPage.dart';
 import 'ProfilePage.dart';
@@ -17,9 +22,15 @@ class HomeProvider extends ChangeNotifier {
   // bool toggleComments = false;
   bool valueCmt = false;
   ApiService apiService = ApiService();
+
   List<TextEditingController> commentController = []; // Initialize map
 // Map to track the toggle state for each post
   Map<int, bool> postCommentToggle = {};
+
+
+  File? _image;
+
+  File? get image => _image;
 
   HomeProvider() {
     initialize();
@@ -71,6 +82,100 @@ class HomeProvider extends ChangeNotifier {
       print('Có lỗi: $onError');
     });
   }
+
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(source: source);
+      if (image != null) {
+        _image = File(image.path);
+        notifyListeners();
+      }
+    } catch (e) {
+      print("Error picking image: $e");
+    }
+  }
+
+  bool _showEmojiPicker = false;
+  bool get showEmojiPicker => _showEmojiPicker;
+
+  void toggleEmojiPicker() {
+    _showEmojiPicker = !_showEmojiPicker;
+    notifyListeners();
+  }
+
+  void openEmoji(TextEditingController controller,Emoji emoji) {
+    controller.text += emoji.emoji;
+    notifyListeners();
+  }
+
+  void handleBackspace(TextEditingController messageController) {
+    messageController.text = messageController.text.characters.skipLast(1).toString();
+    notifyListeners();
+  }
+  String emojify(String text, {String Function(String)? fnFormat}) {
+    // Xử lý đặc biệt cho <3 trước khi xử lý các emoji khác
+    text = text.replaceAll('<3', '❤️');
+    text = text.replaceAll(':)', '🙂');
+    text = text.replaceAll(':(', '☹️');
+
+    Iterable<Match> matches = RegExp(r':\w+').allMatches(text); // Tìm các từ dạng :emoji_name
+    if (matches.isNotEmpty) {
+      var result = text;
+      for (Match m in matches) {
+        var _e = EmojiUtil.stripColons(m.group(0));
+        if (_e == null || m.group(0) == null) continue;
+        if (EmojiUtil.hasName(_e)) {
+          var pattern = RegExp.escape(m.group(0)!);
+          var formattedCode = EmojiUtil.get(_e)!; // Lấy mã emoji từ tên
+          if (fnFormat != null) {
+            formattedCode = fnFormat(formattedCode);
+          }
+          result =
+              result.replaceAll(RegExp(pattern, unicode: true), formattedCode);
+        }
+      }
+      return result;
+    }
+    return text;
+  }
+
+  void _showImageOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera),
+              title: const Text('Chụp ảnh'),
+              onTap: () {
+                _pickImage(ImageSource.camera);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Chọn ảnh từ thư viện'),
+              onTap: () {
+                _pickImage(ImageSource.gallery);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void clearImage() {
+    _image = null;
+    notifyListeners(); // Cập nhật lại UI
+  }
+
+
 }
 
 
@@ -363,44 +468,155 @@ class HomePage extends StatelessWidget {
                                   },
                                 ),
                                 const SizedBox(height: 12),
-                                TextField(
-                                  controller: homeProvider
-                                      .commentController[index],
-                                  // Use the specific controller
-                                  onChanged: (value) {
-
+                                homeProvider.image != null // Kiểm tra nếu có ảnh đã chọn
+                                    ? Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[800], // Màu nền của ảnh
+                                    borderRadius: BorderRadius.circular(12), // Bo góc cho khung ảnh
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        height: 100,
+                                        width: 100,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                          image: DecorationImage(
+                                            image: FileImage(homeProvider.image!),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10), // Khoảng cách giữa ảnh và nút
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            // Nút xóa ảnh
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.close,
+                                                color: Colors.red,
+                                                size: 30,
+                                              ),
+                                              onPressed: () {
+                                                homeProvider.clearImage(); // Xóa ảnh khi nhấn vào nút
+                                              },
+                                            ),
+                                            // Nút gửi bình luận
+                                            IconButton(
+                                              onPressed: () {
+                                                Comments comment = Comments(
+                                                  user: user!,
+                                                  content: homeProvider.commentController[index].text.trim(),
+                                                  post: post,
+                                                );
+                                                homeProvider.apiService.createCmts(comment).then((onValue) {
+                                                  homeProvider.clearCmts(index);
+                                                }).catchError((onError) {
+                                                  print('Có lỗi khi gửi bình luận: $onError');
+                                                });
+                                              },
+                                              icon: const Icon(
+                                                FontAwesomeIcons.paperPlane,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                                    : TextField(
+                                  controller: homeProvider.commentController[index],
+                                  onChanged: (text) {
+                                    // Áp dụng emojify mỗi khi người dùng nhập
+                                    homeProvider.commentController[index].value = homeProvider.commentController[index].value.copyWith(
+                                      text: homeProvider.emojify(text),  // Chuyển đổi tên emoji thành emoji khi nhập
+                                      selection: TextSelection.collapsed(offset: text.length),
+                                    );
                                   },
                                   style: const TextStyle(color: Colors.white),
                                   decoration: InputDecoration(
                                     hintText: "Viết bình luận...",
-                                    hintStyle: const TextStyle(
-                                        color: Colors.white54),
-                                    suffixIcon: IconButton(
-                                      onPressed: () {
-                                        Comments comment = Comments(user: user!,
-                                            content: homeProvider
-                                                .commentController[index].text
-                                                .trim(),
-                                            post: post);
-                                        homeProvider.apiService.createCmts(
-                                            comment).then((onValue) {
-                                          homeProvider.clearCmts(index);
-                                        }).catchError((onError) {
-                                          // Xử lý lỗi
-                                          print(
-                                              'Có lỗi khi gửi bình luận: $onError');
-                                        });
-                                      },
-                                      icon: const Icon(
-                                        FontAwesomeIcons.paperPlane,
-                                        color: Colors.white,
-                                      ),
+                                    hintStyle: const TextStyle(color: Colors.white54),
+                                    suffixIcon: Row(
+                                      mainAxisSize: MainAxisSize.min, // Đảm bảo row chiếm không gian tối thiểu
+                                      children: [
+                                        // Emoji Button
+                                        IconButton(
+                                          onPressed: homeProvider.toggleEmojiPicker,
+                                          icon: const Icon(
+                                            Icons.insert_emoticon,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.camera_alt, color: Colors.white),
+                                          onPressed: () {
+                                            homeProvider._showImageOptions(context);
+                                          },
+                                        ),
+                                        // Send Button
+                                        IconButton(
+                                          onPressed: () {
+                                            Comments comment = Comments(
+                                              user: user!,
+                                              content: homeProvider.commentController[index].text.trim(),
+                                              post: post,
+                                            );
+                                            homeProvider.apiService.createCmts(comment).then((onValue) {
+                                              homeProvider.clearCmts(index);
+                                            }).catchError((onError) {
+                                              print('Có lỗi khi gửi bình luận: $onError');
+                                            });
+                                          },
+                                          icon: const Icon(
+                                            FontAwesomeIcons.paperPlane,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
                               ],
                             )
                                 : Container(),
+                            if (homeProvider.showEmojiPicker)
+                              EmojiPicker(
+                                textEditingController: homeProvider.commentController[index],
+                                onEmojiSelected: (category,  emoji) {
+                                  homeProvider.openEmoji(homeProvider.commentController[index],emoji);
+                                },
+                                onBackspacePressed: () {
+                                  homeProvider.handleBackspace(homeProvider.commentController[index]);
+                                },
+                                config: const Config(
+                                  height: 256,
+                                  checkPlatformCompatibility: true,
+                                  viewOrderConfig: const ViewOrderConfig(
+                                    top: EmojiPickerItem.categoryBar,
+                                    middle: EmojiPickerItem.emojiView,
+                                    bottom: EmojiPickerItem.searchBar,
+                                  ),
+                                  // Loại bỏ skinToneConfig
+                                  categoryViewConfig: const CategoryViewConfig(),
+                                  bottomActionBarConfig: const BottomActionBarConfig(),
+                                  searchViewConfig: const SearchViewConfig(),
+                                ),
+                              ),
                           ],
                         ),
                       );
@@ -411,9 +627,11 @@ class HomePage extends StatelessWidget {
                 return const Center(child: Text('No data found'));
               }
             },
+
           ),
         ],
       );
     });
   }
+
 }

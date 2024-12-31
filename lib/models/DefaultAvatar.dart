@@ -4,4 +4,5 @@ class Images {
   static String url = ApiService.getBaseUrl();
   static String defaultImage = '$url/images/DefaultAvatar.jpg';
   static String defaultBackground = '$url/images/bgProfile.jpg';
+
 }

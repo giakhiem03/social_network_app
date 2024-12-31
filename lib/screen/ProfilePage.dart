@@ -80,10 +80,10 @@ class UserProvider extends ChangeNotifier {
   }
 
   void _resetUserData() {
-    print(_fullNameController.text);
     _fullNameController.text = _user?.fullName ?? '';
     _emailController.text = _user?.email ?? '';
     _phoneController.text = _user?.phoneNumber ?? '';
+    notifyListeners();
   }
 
   void updateFullName(TextEditingController controller) {
@@ -117,6 +117,44 @@ class _ProfilePage extends State<ProfilePage> {
   Widget build(BuildContext context) {
 
     final userProvider = Provider.of<UserProvider>(context);
+
+    Widget _buildSection({required String title, required List<Widget> children}) {
+      return Card(
+        color: Colors.black87,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Floating Action Button for Refresh at the top-right corner
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    iconSize: 28,
+                    icon: const Icon(Icons.refresh,color: Colors.white,),
+                    onPressed: userProvider._resetUserData
+                  ),
+                ],
+              ),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Divider(),
+              ...children,
+            ],
+          ),
+        ),
+      );
+    }
+
 
     return Scaffold(
       backgroundColor: Colors.white12,
@@ -152,7 +190,7 @@ class _ProfilePage extends State<ProfilePage> {
                   ),
                 ),
                 // User Details
-                const SizedBox(height: 30),
+                const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: _buildSection(
@@ -164,20 +202,69 @@ class _ProfilePage extends State<ProfilePage> {
                       _buildDetailRow(context, "Số điện thoại", userProvider.phoneController.text, userProvider.phoneController, "phone"),
                       Padding(
                         padding: const EdgeInsets.all(4.0),
-                        child: ElevatedButton(
-                          onPressed: () => _onUpdatePressed(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orangeAccent,
-                            padding: const EdgeInsets.all(8.0),
-                            shape: RoundedRectangleBorder(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.orangeAccent, // No solid color, just the gradient shadow
+                                offset: Offset(0, 4), // Vertical shadow offset
+                                blurRadius: 10, // The spread of the shadow
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
+                              boxShadow: const[
+                                BoxShadow(
+                                  color: Colors.transparent, // No solid shadow color here
+                                  offset: Offset(0, 0), // No direct offset here for the shadow
+                                  blurRadius: 0, // We will create shadow using the gradient
+                                  spreadRadius: 0,
+                                ),
+                              ],
                             ),
-                          ),
-                          child: const Text(
-                            'Update Profile',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                        ),
+                            child: Stack(
+                              children: [
+                                // Gradient shadow container
+                                Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  bottom: 4,
+                                  top: 4,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      gradient: const LinearGradient(
+                                        begin: Alignment.centerLeft, // Gradient start
+                                        end: Alignment.centerRight, // Gradient end
+                                        colors: [Colors.white, Colors.black], // Gradient from white to black
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // Elevated button
+                                ElevatedButton(
+                                  onPressed: () => _onUpdatePressed(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orangeAccent, // Button background color
+                                    padding: const EdgeInsets.all(8.0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 0, // No default shadow for the button
+                                  ),
+                                  child: const Text(
+                                    'Update Profile',
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        )
                       ),
                     ],
                   ),
@@ -207,41 +294,38 @@ class _ProfilePage extends State<ProfilePage> {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Change Profile Picture',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Chụp ảnh mới'),
-                onTap: () {
-                  Navigator.pop(context);
-                  userProvider.pickImage(ImageSource.camera, true);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Chọn ảnh trên máy'),
-                onTap: () {
-                  Navigator.pop(context);
-                  userProvider.pickImage(ImageSource.gallery, true);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.image),
-                title: const Text('Thay đổi ảnh nền'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showBackgroundImageOptions(context);
-                },
-              ),
-            ],
-          ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Change Profile Picture',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Chụp ảnh mới'),
+              onTap: () {
+                Navigator.pop(context);
+                userProvider.pickImage(ImageSource.camera, true);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Chọn ảnh trên máy'),
+              onTap: () {
+                Navigator.pop(context);
+                userProvider.pickImage(ImageSource.gallery, true);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Thay đổi ảnh nền'),
+              onTap: () {
+                Navigator.pop(context);
+                _showBackgroundImageOptions(context);
+              },
+            ),
+          ],
         );
       },
     );
@@ -283,31 +367,6 @@ class _ProfilePage extends State<ProfilePage> {
     );
   }
 
-  Widget _buildSection({required String title, required List<Widget> children}) {
-    return Card(
-      color: Colors.black87,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const Divider(),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildDetailRow(BuildContext context, String label, String value, TextEditingController? controller, String field) {
     return Padding(

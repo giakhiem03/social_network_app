@@ -7,6 +7,7 @@ import 'package:social_network_project/screen/ProfilePage.dart';
 import 'screen/LoginPage.dart';
 
 void main() {
+
   runApp(
     MultiProvider(
       providers: [
