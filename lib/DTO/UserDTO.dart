@@ -1,5 +1,3 @@
-
-
 class UserDTO {
 
   UserDTO({ required this.username,required this.password});
