@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../ApiService/ApiService.dart';
 import '../models/Friends.dart';
 import '../models/User.dart';
-import '../models/ProfilePage.dart';
+import 'ProfilePage.dart';
 
 class FriendRequestPage extends StatefulWidget {
 
