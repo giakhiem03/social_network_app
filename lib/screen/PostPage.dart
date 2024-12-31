@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
@@ -26,7 +24,7 @@ class _PostPage extends State<PostPage> {
 
   File? _selectedImage;
   bool valueExist = false;
-  ApiService apiService = new ApiService();
+  ApiService apiService = ApiService();
 
   // Hàm chọn ảnh từ thư viện hoặc máy ảnh
   Future<void> _pickImage(ImageSource source) async {
@@ -63,7 +61,7 @@ class _PostPage extends State<PostPage> {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Đăng bài thành công!")));
       Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => Layout(user: widget.user)));
+          MaterialPageRoute(builder: (context) => Layout()));
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Đã xảy ra lỗi khi đăng bài!")));
