@@ -4,16 +4,18 @@ import 'package:google_fonts/google_fonts.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:provider/provider.dart';
 import 'package:social_network_project/models/DefaultAvatar.dart';
 import '../models/User.dart';
 import 'LoginPage.dart';
+import 'ProfilePage.dart';
 
 class DrawerPage extends StatefulWidget {
   final Function(int) onItemSelected;
-  final User user;
-  const DrawerPage({required this.onItemSelected, required this.user, super.key});
 
-  _DrawerPage createState() => _DrawerPage();
+  const DrawerPage({required this.onItemSelected, super.key});
+
+  State<DrawerPage> createState() => _DrawerPage();
 
 }
 
@@ -23,6 +25,10 @@ class _DrawerPage extends State<DrawerPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
+    final user = userProvider.user;
+
     return  Drawer(
       backgroundColor: Colors.grey[800],
       child: ListView(
@@ -81,7 +87,7 @@ class _DrawerPage extends State<DrawerPage> {
                   tileColor:
                   _selectedIndex == 2 ? Colors.white : Colors.grey[800],
                   leading: const badges.Badge(
-                    badgeContent: Text('5'),
+                    badgeContent: Text(''),
                     badgeStyle: badges.BadgeStyle(
                       badgeColor: Colors.red,
                     ),
@@ -121,7 +127,7 @@ class _DrawerPage extends State<DrawerPage> {
                   _selectedIndex == 4 ? Colors.white : Colors.grey[800],
                   leading: CircleAvatar(
                     radius: 15,
-                    backgroundImage: NetworkImage(widget.user.image ?? Images.defaultImage),
+                    backgroundImage: NetworkImage( user?.image ?? Images.defaultImage),
                   ),
                   title: Text('Trang cá nhân',
                       style:
@@ -141,7 +147,7 @@ class _DrawerPage extends State<DrawerPage> {
                     Icons.settings,
                     color: Colors.orangeAccent,
                   ),
-                  title: Text('Settings',
+                  title: Text('Cài đặt',
                       style:
                       GoogleFonts.dynaPuff(color: Colors.orangeAccent)),
                   onTap: () {
@@ -154,7 +160,7 @@ class _DrawerPage extends State<DrawerPage> {
                 ),
                 ListTile(
                   tileColor:
-                  _selectedIndex == 5 ? Colors.white : Colors.grey[800],
+                  _selectedIndex == 6 ? Colors.white : Colors.grey[800],
                   leading: const Icon(
                     Icons.logout,
                     color: Colors.orangeAccent,
@@ -163,7 +169,10 @@ class _DrawerPage extends State<DrawerPage> {
                       style:
                       GoogleFonts.dynaPuff(color: Colors.orangeAccent)),
                   onTap: () {
-                    widget.user.status=false;
+                    user?.status=false;
+                    _selectedIndex = 0;
+                    Provider.of<UserProvider>(context, listen: false).logout();
+
                     Future.microtask(() {
                       Navigator.pushReplacement(
                         context,
