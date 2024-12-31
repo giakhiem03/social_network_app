@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:social_network_project/DTO/UserDTO.dart';
+import 'package:social_network_project/DTO/LoginDTO.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:social_network_project/DTO/UpdateUserDTO.dart';
 import 'package:social_network_project/models/Comments.dart';
 import 'package:social_network_project/models/Friends.dart';
+import 'package:social_network_project/models/Message.dart';
 
 import '../models/Post.dart';
 import '../models/User.dart';
@@ -16,7 +17,7 @@ import '../models/Notifications.dart';
 class ApiService {
   final String baseUrl = '${getBaseUrl()}/api/users';
 
-   static String getBaseUrl()  {
+  static String getBaseUrl()  {
     if (kIsWeb) {
       // Trường hợp chạy trên web
       return 'http://localhost:8080';
@@ -64,15 +65,13 @@ class ApiService {
   }
 
   Future<User> login(String username, String password) async {
-    UserDTO user = new UserDTO(username: username, password: password);
-    print(baseUrl);
+    LoginDTO user = LoginDTO(username: username, password: password);
     final response = await http.post(Uri.parse('$baseUrl/login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(user.toJson())
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(user.toJson())
     );
-    print(response.statusCode);
     if(response.statusCode == 200){
       return User.fromJson(jsonDecode(response.body));
     }else{
@@ -92,33 +91,16 @@ class ApiService {
 
   Future<User> createUser(User user) async {
     final response = await http.post(
-      Uri.parse(baseUrl),
+      Uri.parse('$baseUrl/register'),
       headers: <String, String>{
         'Content-Type': 'application/json',
-
       },
       body: jsonEncode(user.toJson()),
     );
     if (response.statusCode == 200) {
       return User.fromJson(jsonDecode(response.body));
     } else {
-      print(response.statusCode);
       throw Exception('Failed to create user');
-    }
-  }
-
-  Future<User> updateUser(int id, User user) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/update/$id'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(user.toJson()),
-    );
-    if (response.statusCode == 200) {
-      return User.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to update user');
     }
   }
 
@@ -205,8 +187,8 @@ class ApiService {
       if (postImage != null) {
         final imageResponse = await uploadPostImage(postImage);
         if (imageResponse.statusCode == 200) {
-            post.postImage = imageResponse.body;
-            print("Up load ảnh thành công");// nhận đường dẫn ảnh từ response API upload
+          post.postImage = imageResponse.body;
+          print("Up load ảnh thành công");// nhận đường dẫn ảnh từ response API upload
         } else {
           print('Failed to upload image: ${imageResponse.statusCode}');
           throw Exception('Failed to upload image');
@@ -259,36 +241,36 @@ class ApiService {
 
   //Gọi API lấy tất cả bài post
   Future<List<Post>> getAllPosts() async {
-     var uri = Uri.parse('$baseUrl/getAllPosts');
-     final response = await http.get(uri);
-     if(response.statusCode == 200){
-       List<dynamic> posts = jsonDecode(response.body);
-       return posts.map((post) => Post.fromJson(post)).toList();
-     } else {
-       throw Exception('Failed to get All Posts');
-     }
+    var uri = Uri.parse('$baseUrl/getAllPosts');
+    final response = await http.get(uri);
+    if(response.statusCode == 200){
+      List<dynamic> posts = jsonDecode(response.body);
+      return posts.map((post) => Post.fromJson(post)).toList();
+    } else {
+      throw Exception('Failed to get All Posts');
+    }
   }
 
   //Gọi API khi User click tim
   Future<Post?> toggleLike(int postId, int userId) async {
-     try {
-       final response = await http.post(
-         Uri.parse('$baseUrl/$postId/toggle-like/$userId'),
-       );
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/$postId/toggle-like/$userId'),
+      );
 
-       if (response.statusCode == 200) {
-         print('Successfully toggled like');
-         Post post = Post.fromJson(jsonDecode(response.body));
-         return post; // Parse từ body (string) sang integer
-         // Cập nhật UI sau khi API gọi thành công
-       } else {
-         print('Failed to toggle like');
-         return null;
-       }
-     }catch (e) {
-        print('Error occurred while toggling like: $e');
+      if (response.statusCode == 200) {
+        print('Successfully toggled like');
+        Post post = Post.fromJson(jsonDecode(response.body));
+        return post; // Parse từ body (string) sang integer
+        // Cập nhật UI sau khi API gọi thành công
+      } else {
+        print('Failed to toggle like');
         return null;
       }
+    }catch (e) {
+      print('Error occurred while toggling like: $e');
+      return null;
+    }
   }
 
   Future<List<Comments>> getAllCmts() async {
@@ -340,18 +322,18 @@ class ApiService {
   }
 
   Future<List<User>> searchByName(String name) async {
-     try {
-       var uri = Uri.parse('$baseUrl/search/$name');
-       final response = await http.get(uri);
-       if(response.statusCode == 200) {
-         List jsonData = json.decode(response.body);
-         return jsonData.map((user)=> User.fromJson(user)).toList();
-       } else {
-         throw Exception('Failed to load notes');
-       }
-     }catch(e){
-       throw Exception('Failed to load users catch');
-     }
+    try {
+      var uri = Uri.parse('$baseUrl/search/$name');
+      final response = await http.get(uri);
+      if(response.statusCode == 200) {
+        List jsonData = json.decode(response.body);
+        return jsonData.map((user)=> User.fromJson(user)).toList();
+      } else {
+        throw Exception('Failed to load notes');
+      }
+    }catch(e){
+      throw Exception('Failed to load users catch');
+    }
   }
 
   Future<Friends> addFriend(Friends friend) async {
@@ -399,8 +381,98 @@ class ApiService {
         throw Exception('Failed to remove friend');
       }
     }catch(e){
-    throw Exception('Failed to remove friend catch');
+      throw Exception('Failed to remove friend catch');
     }
   }
 
+  Future<void> acceptFriend(int friendId) async{
+    try {
+      var uri = Uri.parse('$baseUrl/acceptFriend/$friendId');
+      final response = await http.put(uri);
+      if(response.statusCode == 200) {
+        print("accept successful");
+      } else {
+        throw Exception('Failed to remove friend');
+      }
+    }catch(e){
+      throw Exception('Failed to remove friend catch');
+    }
+  }
+
+  Future<List<Message>> getAllMessage() async {
+    try {
+      var uri = Uri.parse('$baseUrl/messages');
+      final response = await http.get(uri);
+      if(response.statusCode == 200) {
+        List jsonData = json.decode(response.body);
+        print("Successful");
+        return jsonData.map((message)=> Message.fromJson(message)).toList();
+      } else {
+        throw Exception('Failed to remove friend');
+      }
+    } catch(e){
+      throw Exception('Failed to remove friend catch');
+    }
+  }
+
+  Future<void> sendMessage(Message message) async {
+    try {
+      var uri = Uri.parse('$baseUrl/sendMessage');
+      final response = await http.post(
+        uri,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(message.toJson()),
+      );
+      print(response.statusCode);
+      if(response.statusCode == 200) {
+        print("Send Successful");
+      } else {
+        throw Exception('Failed to load notes');
+      }
+    }catch(e){
+      throw Exception('Failed to load users catch');
+    }
+  }
+
+  Future<User> updateUser(UpdateUserDTO user, File? profileImage, File? backgroundImage) async {
+    try {
+      var uri = Uri.parse('$baseUrl/updateUser');
+
+      // Tạo một multipart request
+      var request = http.MultipartRequest('PUT', uri);
+
+      request.fields['userId'] = '${user.userId}';
+      request.fields['fullName'] = user.fullName;
+      request.fields['email'] = user.email;
+      request.fields['phoneNumber'] = user.phoneNumber;
+
+      // Thêm các tệp hình ảnh nếu có
+      if (profileImage != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+            'profileImage', profileImage.path));
+      }
+      if (backgroundImage != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+            'backgroundImage', backgroundImage.path));
+      }
+
+      // Gửi request và nhận response
+      var response = await request.send();
+
+      // Kiểm tra trạng thái của response
+      if (response.statusCode == 200) {
+        // Convert StreamedResponse to normal response body
+        var responseString = await response.stream.bytesToString();
+        return User.fromJson(json.decode(responseString));
+      } else {
+        print("Failed to update user: ${response.statusCode}");
+        throw Exception('Failed to update user');
+      }
+    } catch (e) {
+      print("Error: $e");
+      throw Exception('Failed to update users catch');
+    }
+  }
 }
