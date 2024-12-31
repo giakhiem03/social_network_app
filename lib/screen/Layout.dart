@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:social_network_project/screen/DrawerPage.dart';
 import 'package:social_network_project/screen/ListSearchPage.dart';
 
 import '../models/User.dart';
+import 'FriendRequestPage.dart';
 import 'HomePage.dart';
 import 'LoginPage.dart';
+import 'ListMessagePage.dart';
 import 'NotificationPage.dart';
-// import 'package:badges/badges.dart' as badges;
-// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-// import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-class Layout extends StatefulWidget {
-  final User user;
-  const Layout({required this.user,super.key});
+import 'ProfilePage.dart';
 
-  _Layout createState() => _Layout();
+class Layout extends StatefulWidget {
+
+  const Layout({super.key});
+
+  @override
+  State<Layout> createState() => _Layout();
 }
 
 class _Layout extends State<Layout> {
@@ -22,8 +25,6 @@ class _Layout extends State<Layout> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _frmSearch = GlobalKey<ScaffoldState>();
   final TextEditingController _searchInput = TextEditingController();
-
-
 
   int _selectedIndex = 0;
 
@@ -33,16 +34,19 @@ class _Layout extends State<Layout> {
 
   @override
   Widget build(BuildContext context) {
+
+    final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
+    final user = userProvider.user;
     final List<Widget> _contentWidgets = [
-      HomePage(user: widget.user,),
-      NotificationPage(user: widget.user),
-      const Center(child: Text('1', style: TextStyle(fontSize: 24))),
-      const Center(child: Text('2', style: TextStyle(fontSize: 24))),
-      const Center(child: Text('3', style: TextStyle(fontSize: 24))),
+      const HomePage(),
+      NotificationPage(),
+      const ListMessagePage(),
+      const FriendRequestPage(),
+      ProfilePage(),
       const Center(child: Text('4', style: TextStyle(fontSize: 24))),
       const Center(child: Text('Settings Content', style: TextStyle(fontSize: 24))),
     ];
-    if (!widget.user.status) {
+    if (user!.status==false) {
       Future.microtask(() {
         Navigator.pushReplacement(
           context,
@@ -54,6 +58,7 @@ class _Layout extends State<Layout> {
       child: Scaffold(
         key: _scaffoldKey,
         // Gán key cho Scaffold
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           backgroundColor: Colors.white10,
           leading: IconButton(
@@ -76,11 +81,11 @@ class _Layout extends State<Layout> {
                   hintText: 'Search',
                   suffixIcon: IconButton(onPressed:()=>Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ListSearchPage(userSend: widget.user,name: _searchInput.text)
-                  )),
+                      MaterialPageRoute(builder: (context) => ListSearchPage(userSend: user,name: _searchInput.text)
+                      )),
                       icon: const Icon(Icons.search)),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
+                      borderRadius: BorderRadius.circular(50),
                       borderSide: BorderSide.none
                   ),
                   focusedBorder: OutlineInputBorder(
@@ -94,7 +99,7 @@ class _Layout extends State<Layout> {
                 ),
                 style: GoogleFonts.dynaPuff(color: Colors.white),
                 onChanged: searchInput,
-            )
+              )
           ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1), // Chiều cao border
@@ -111,7 +116,6 @@ class _Layout extends State<Layout> {
               _selectedIndex = index;
             });
           },
-          user: widget.user,
         ),
         body: _contentWidgets[_selectedIndex],
       ),
