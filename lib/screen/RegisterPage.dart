@@ -32,7 +32,9 @@ class _RegisterPage extends State<RegisterPage> {
 
   void submitForm() {
     if (formKey.currentState!.validate()) {
-      User user = User(username: usernameController.text,password: passwordController.text,email: emailController.text,status: false,role: Role(roleId: 2));
+      User user = User(username: usernameController.text,
+          password: passwordController.text,email: emailController.text,
+          status: false,role: Role(roleId: 2));
       apiService.createUser(user)
           .then((new_user) {
             print(new_user);

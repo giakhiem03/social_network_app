@@ -73,14 +73,15 @@ import 'Role.dart';
 
 class User {
   final int? userId;
-  final String? fullName;
-  final String username;
+  String? fullName;
+  String username;
   final String password;
-  final String email;
-  final String? phoneNumber;
+  String email;
+  String? phoneNumber;
   final Role role;
   late bool status;
   final String? image;
+  final String? backgroundImage;
   final Set<Post> posts;
 
   User({
@@ -93,8 +94,10 @@ class User {
     required this.role,
     required this.status,
     this.image,
+    this.backgroundImage,
     this.posts = const {},
   });
+
 
   factory User.fromJson(Map<String, dynamic> json) {
     // Chuyển 'posts' từ List<dynamic> thành Set<Post>
@@ -111,6 +114,7 @@ class User {
       email: json["email"],
       phoneNumber: json["phoneNumber"],
       image: json["image"],
+      backgroundImage: json["backgroundImage"],
       role: Role.fromJson(json["role"]),
       status: json["status"],
       posts: posts,
@@ -125,7 +129,8 @@ class User {
     "email": email,
     "phoneNumber": phoneNumber,
     "image": image,
-    "role": role.toJson(),
+    "backgroundImage": backgroundImage,
+    "role": role.roleId,
     "status": status,
     "posts": posts.map((post) => post.postId).toList()
   };

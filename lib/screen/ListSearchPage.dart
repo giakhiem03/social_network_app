@@ -43,13 +43,19 @@ class SearchProvider extends ChangeNotifier {
   }
 
   void cancelAddFriends(int friendId) {
-    apiService.removeFriend(friendId);
-    notifyListeners(); // Thông báo cập nhật
+    apiService.removeFriend(friendId).then((onValue){
+      notifyListeners();
+    }).catchError((onError){
+      print(onError);
+    }); // Thông báo cập nhật
   }
 
   void acceptFriends(int friendId) {
-    apiService.acceptFriend(friendId);
-    notifyListeners(); // Thông báo cập nhật
+    apiService.acceptFriend(friendId).then((onValue){
+      notifyListeners(); // Thông báo cập nhật
+    }).catchError((onError){
+      print(onError);
+    });
   }
 }
 
@@ -167,10 +173,14 @@ class ListSearchPage extends StatelessWidget {
                                           icon.icon == FontAwesomeIcons.userGroup) {
                                         Friends friend = friends.firstWhere(
                                               (f) =>
-                                          f.userIdSend.userId ==
-                                              userSend.userId &&
-                                              f.userIdReceive.userId ==
-                                                  user.userId,
+                                              (f.userIdSend.userId ==
+                                                  userSend.userId &&
+                                                  f.userIdReceive.userId ==
+                                                      user.userId) ||
+                                                  (f.userIdSend.userId ==
+                                                  user.userId &&
+                                                  f.userIdReceive.userId ==
+                                                      userSend.userId),
                                         );
                                         searchProvider.cancelAddFriends(friend.id!);
                                       } else if(icon.icon == Icons.check) {

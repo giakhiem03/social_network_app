@@ -9,6 +9,7 @@ import 'package:social_network_project/models/Post.dart';
 import '../models/DefaultAvatar.dart';
 import '../models/User.dart';
 import 'PostPage.dart';
+import 'ProfilePage.dart';
 
 class HomeProvider extends ChangeNotifier {
   late Future<List<Post>> futurePosts;
@@ -22,6 +23,7 @@ class HomeProvider extends ChangeNotifier {
 
   HomeProvider() {
     initialize();
+
   }
 
   void toggleComment(int postId) {
@@ -73,12 +75,16 @@ class HomeProvider extends ChangeNotifier {
 
 
 class HomePage extends StatelessWidget {
-  final User user;
 
-  const HomePage({required this.user, super.key});
+
+  const HomePage({ super.key});
 
   @override
   Widget build(BuildContext context) {
+
+    final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
+    final user = userProvider.user;
+
     return Consumer<HomeProvider>(builder: (context, homeProvider, child) {
       return Column(
         children: [
@@ -92,7 +98,7 @@ class HomePage extends StatelessWidget {
                     CircleAvatar(
                       radius: 24,
                       backgroundImage: NetworkImage(
-                          user.image ?? Images.defaultImage),
+                          user?.image ?? Images.defaultImage),
                     ),
                     const SizedBox(width: 20),
                     GestureDetector(
@@ -100,7 +106,7 @@ class HomePage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PostPage(user: user),
+                            builder: (context) => PostPage(user: user!,),
                           ),
                         );
                       },
@@ -371,7 +377,7 @@ class HomePage extends StatelessWidget {
                                         color: Colors.white54),
                                     suffixIcon: IconButton(
                                       onPressed: () {
-                                        Comments comment = Comments(user: user,
+                                        Comments comment = Comments(user: user!,
                                             content: homeProvider
                                                 .commentController[index].text
                                                 .trim(),

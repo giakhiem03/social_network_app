@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../ApiService/ApiService.dart';
 import '../models/Friends.dart';
 import '../models/User.dart';
 import 'MessagePage.dart';
+import 'ProfilePage.dart';
 
 class ListMessagePage extends StatefulWidget {
-  final User user;
-  const ListMessagePage({required this.user,super.key});
+
+  const ListMessagePage({super.key});
 
   @override
   State<ListMessagePage> createState() => _ListMessagePage();
@@ -31,6 +33,10 @@ class _ListMessagePage extends State<ListMessagePage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
+    final user = userProvider.user;
+
     return Scaffold(
       backgroundColor: Colors.white10,
       body: Column(
@@ -61,14 +67,14 @@ class _ListMessagePage extends State<ListMessagePage> {
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       Friends friend = snapshot.data![index];
-                      if((friend.userIdSend.userId == widget.user.userId &&
+                      if((friend.userIdSend.userId == user!.userId &&
                           friend.statusRelationship == 2)){
                         return ElevatedButton(
                           onPressed: () {
                             // Handle button press action here
                             Navigator.push(context,
                                 MaterialPageRoute(builder: (context)=>
-                                    MessagePage(you: widget.user,yourFriend: friend.userIdReceive,)));
+                                    MessagePage(you: user,yourFriend: friend.userIdReceive,)));
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white38,
@@ -104,14 +110,14 @@ class _ListMessagePage extends State<ListMessagePage> {
                             ),
                           ),
                         );
-                      } else if((friend.userIdReceive.userId == widget.user.userId &&
+                      } else if((friend.userIdReceive.userId == user.userId &&
                           friend.statusRelationship == 2)){
                         return ElevatedButton(
                           onPressed: () {
                             // Handle button press action here
                             Navigator.push(context,
                                 MaterialPageRoute(builder: (context)=>
-                                    MessagePage(you: widget.user,yourFriend: friend.userIdSend,)));
+                                    MessagePage(you: user,yourFriend: friend.userIdSend,)));
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white38,

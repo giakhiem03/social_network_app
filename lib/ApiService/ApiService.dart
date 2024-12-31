@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:social_network_project/DTO/UserDTO.dart';
+import 'package:social_network_project/DTO/LoginDTO.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:social_network_project/DTO/UpdateUserDTO.dart';
 import 'package:social_network_project/models/Comments.dart';
 import 'package:social_network_project/models/Friends.dart';
 import 'package:social_network_project/models/Message.dart';
@@ -65,15 +65,13 @@ class ApiService {
   }
 
   Future<User> login(String username, String password) async {
-    UserDTO user = new UserDTO(username: username, password: password);
-    print(baseUrl);
+    LoginDTO user = LoginDTO(username: username, password: password);
     final response = await http.post(Uri.parse('$baseUrl/login'),
       headers: <String, String>{
         'Content-Type': 'application/json',
       },
       body: jsonEncode(user.toJson())
     );
-    print(response.statusCode);
     if(response.statusCode == 200){
       return User.fromJson(jsonDecode(response.body));
     }else{
@@ -93,33 +91,16 @@ class ApiService {
 
   Future<User> createUser(User user) async {
     final response = await http.post(
-      Uri.parse(baseUrl),
+      Uri.parse('$baseUrl/register'),
       headers: <String, String>{
         'Content-Type': 'application/json',
-
       },
       body: jsonEncode(user.toJson()),
     );
     if (response.statusCode == 200) {
       return User.fromJson(jsonDecode(response.body));
     } else {
-      print(response.statusCode);
       throw Exception('Failed to create user');
-    }
-  }
-
-  Future<User> updateUser(int id, User user) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/update/$id'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(user.toJson()),
-    );
-    if (response.statusCode == 200) {
-      return User.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to update user');
     }
   }
 
@@ -455,4 +436,43 @@ class ApiService {
     }
   }
 
+  Future<User> updateUser(UpdateUserDTO user, File? profileImage, File? backgroundImage) async {
+    try {
+      var uri = Uri.parse('$baseUrl/updateUser');
+
+      // Tạo một multipart request
+      var request = http.MultipartRequest('PUT', uri);
+
+      request.fields['userId'] = '${user.userId}';
+      request.fields['fullName'] = user.fullName;
+      request.fields['email'] = user.email;
+      request.fields['phoneNumber'] = user.phoneNumber;
+
+      // Thêm các tệp hình ảnh nếu có
+      if (profileImage != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+            'profileImage', profileImage.path));
+      }
+      if (backgroundImage != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+            'backgroundImage', backgroundImage.path));
+      }
+
+      // Gửi request và nhận response
+      var response = await request.send();
+
+      // Kiểm tra trạng thái của response
+      if (response.statusCode == 200) {
+        // Convert StreamedResponse to normal response body
+        var responseString = await response.stream.bytesToString();
+        return User.fromJson(json.decode(responseString));
+      } else {
+        print("Failed to update user: ${response.statusCode}");
+        throw Exception('Failed to update user');
+      }
+    } catch (e) {
+      print("Error: $e");
+      throw Exception('Failed to update users catch');
+    }
+  }
 }

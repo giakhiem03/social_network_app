@@ -21,9 +21,12 @@ class MessageProvider extends ChangeNotifier {
     if(content.isNotEmpty) {
       Message message = Message(userSendMessage: you,
           userReceiveMessage: yourFriend, content: content);
-      apiService.sendMessage(message);
-      futureMessage = apiService.getAllMessage();
-      notifyListeners();
+      apiService.sendMessage(message).then((onValue){
+        futureMessage = apiService.getAllMessage();
+        notifyListeners();
+      }).catchError((onError){
+        print(onError);
+      });
     }
   }
 

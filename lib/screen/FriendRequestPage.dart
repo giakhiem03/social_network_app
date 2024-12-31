@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../ApiService/ApiService.dart';
 import '../models/Friends.dart';
 import '../models/User.dart';
+import 'ProfilePage.dart';
 
 class FriendRequestPage extends StatefulWidget {
-  final User user;
-  const FriendRequestPage({required this.user,super.key});
+
+  const FriendRequestPage({super.key});
 
   @override
   State<FriendRequestPage> createState() => _FriendRequestPage();
@@ -37,6 +39,10 @@ class _FriendRequestPage extends State<FriendRequestPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
+    final user = userProvider.user;
+
     return Scaffold(
       backgroundColor: Colors.white10,
       body: Column(
@@ -67,7 +73,7 @@ class _FriendRequestPage extends State<FriendRequestPage> {
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       Friends friend = snapshot.data![index];
-                      return (friend.userIdReceive.userId == widget.user.userId &&
+                      return (friend.userIdReceive.userId == user!.userId &&
                           friend.statusRelationship == 1) ?
                         Container(
                         padding: const EdgeInsets.only(top: 10,bottom: 10),

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
 import 'package:social_network_project/models/Notifications.dart';
 
 import '../models/User.dart';
+import 'ProfilePage.dart';
 
 class NotificationPage extends StatefulWidget {
-  User user;
-  NotificationPage({required this.user,super.key});
+
+  NotificationPage({super.key});
 
   @override
   State<NotificationPage> createState() => _NotificationPage();
@@ -25,6 +27,10 @@ class _NotificationPage extends State<NotificationPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
+    final user = userProvider.user;
+
     return Scaffold(
       backgroundColor: Colors.white10,
       body: Column(
@@ -55,7 +61,7 @@ class _NotificationPage extends State<NotificationPage> {
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       Notifications notification = snapshot.data![index];
-                      return notification.userIdReceive.username == widget.user.username ?
+                      return notification.userIdReceive.username == user!.username ?
                         Container(
                         padding: const EdgeInsets.only(top: 10,bottom: 10),
                         margin: const EdgeInsets.only(bottom: 10),
