@@ -76,115 +76,115 @@ class _PostPage extends State<PostPage> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Colors.white,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Row(
-          children: [
-            const Icon(
-              Icons.public,
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
               color: Colors.white,
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            const SizedBox(width: 10),
-            Text('Công khai', style: GoogleFonts.chewy(color: Colors.white)),
-            Expanded(
-              // Use Expanded to push the 'data' text to the end
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    color: valueExist || _selectedImage != null
-                        ? Colors.orangeAccent
-                        : Colors.white54,
-                    onPressed: valueExist || _selectedImage != null
-                        ? UploadPost
-                        : null,
-                  )
-                ],
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.white54,
-      ),
-      backgroundColor: Colors.black,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Form nhập cảm xúc
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Form(
-                child: TextFormField(
-                  controller: _PostInput,
-                  maxLines: null,
-                  // Cho phép nhập nhiều dòng
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                    ),
-                    hintText: 'Chia sẻ cảm xúc của bạn!',
-                  ),
-                  style: GoogleFonts.dynaPuff(color: Colors.white70),
-                  onChanged: (value) {
-                    setState(() {
-                      valueExist = _PostInput.text.trim().isNotEmpty;
-                    });
-                  },
-                ),
-              ),
-            ),
-            // Hiển thị ảnh nếu có chọn
-            _selectedImage != null
-                ? SizedBox(
-                    height: 380, // Độ cao cố định
-                    width: double.infinity, // Độ rộng toàn màn hình
-                    child: Image.file(
-                      _selectedImage!,
-                      fit: BoxFit.contain, // Lấp đầy khung với tỷ lệ ảnh gốc
-                    ),
-                  )
-                : Container(),
-            // Các nút chọn ảnh
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            title: Row(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue, // Set the background color
-                    borderRadius: BorderRadius.circular(
-                        8.0), // Optional: Adds rounded corners
-                  ),
-                  child: IconButton(
-                    onPressed: () => _pickImage(ImageSource.gallery),
-                    icon: const Icon(Icons.photo_library),
-                    color: Colors.white,
+                const Icon(
+                  Icons.public,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 10),
+                Text('Công khai', style: GoogleFonts.chewy(color: Colors.white)),
+                Expanded(
+                  // Use Expanded to push the 'data' text to the end
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.send),
+                        color: valueExist || _selectedImage != null
+                            ? Colors.orangeAccent
+                            : Colors.white54,
+                        onPressed: valueExist || _selectedImage != null
+                            ? UploadPost
+                            : null,
+                      )
+                    ],
                   ),
                 ),
-                const SizedBox(width: 20,),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue, // Set the background color
-                    borderRadius: BorderRadius.circular(
-                        8.0), // Optional: Adds rounded corners
-                  ),
-                  child: IconButton(
-                    onPressed: () => _pickImage(ImageSource.camera),
-                    icon: const Icon(Icons.camera_alt),
-                    color: Colors.white, // Icon color
-                  ),
-                ),
-                const SizedBox(width: 30,)
               ],
-            )
-          ],
-        ),
-      ),
-    ));
+            ),
+            backgroundColor: Colors.white54,
+          ),
+          backgroundColor: Colors.black,
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Form nhập cảm xúc
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Form(
+                    child: TextFormField(
+                      controller: _PostInput,
+                      maxLines: null,
+                      // Cho phép nhập nhiều dòng
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        hintText: 'Chia sẻ cảm xúc của bạn!',
+                      ),
+                      style: GoogleFonts.dynaPuff(color: Colors.white70),
+                      onChanged: (value) {
+                        setState(() {
+                          valueExist = _PostInput.text.trim().isNotEmpty;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                // Hiển thị ảnh nếu có chọn
+                _selectedImage != null
+                    ? SizedBox(
+                  height: 380, // Độ cao cố định
+                  width: double.infinity, // Độ rộng toàn màn hình
+                  child: Image.file(
+                    _selectedImage!,
+                    fit: BoxFit.contain, // Lấp đầy khung với tỷ lệ ảnh gốc
+                  ),
+                )
+                    : Container(),
+                // Các nút chọn ảnh
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.blue, // Set the background color
+                        borderRadius: BorderRadius.circular(
+                            8.0), // Optional: Adds rounded corners
+                      ),
+                      child: IconButton(
+                        onPressed: () => _pickImage(ImageSource.gallery),
+                        icon: const Icon(Icons.photo_library),
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 20,),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.blue, // Set the background color
+                        borderRadius: BorderRadius.circular(
+                            8.0), // Optional: Adds rounded corners
+                      ),
+                      child: IconButton(
+                        onPressed: () => _pickImage(ImageSource.camera),
+                        icon: const Icon(Icons.camera_alt),
+                        color: Colors.white, // Icon color
+                      ),
+                    ),
+                    const SizedBox(width: 30,)
+                  ],
+                )
+              ],
+            ),
+          ),
+        ));
   }
 }
