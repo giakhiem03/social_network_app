@@ -6,236 +6,247 @@ import '../models/Message.dart';
 import '../models/User.dart';
 
 class MessageProvider extends ChangeNotifier {
-  final ApiService apiService = ApiService();
-  List<Message> _messages = [];
-  List<Message> get messages => _messages;
+  ApiService apiService = ApiService();
+  late Future<List<Message>> futureMessage;
 
-  Future<void> initialize() async {
-    _messages = await apiService.getAllMessage();
-    notifyListeners();
+  MessageProvider() {
+    initialize();
   }
 
-  Future<void> sendMessage(User you, User yourFriend, String content) async {
-    if (content.isNotEmpty) {
-      Message message = Message(
-          userSendMessage: you, userReceiveMessage: yourFriend, content: content);
-      await apiService.sendMessage(message);
-      _messages.add(message); // Thêm tin nhắn mới vào danh sách
-      notifyListeners();
+  void initialize() {
+    futureMessage = apiService.getAllMessage();
+  }
+
+  void sendMessage(User you, User yourFriend, String content) {
+    if(content.isNotEmpty) {
+      Message message = Message(userSendMessage: you,
+          userReceiveMessage: yourFriend, content: content);
+      apiService.sendMessage(message).then((onValue){
+        futureMessage = apiService.getAllMessage();
+        notifyListeners();
+      }).catchError((onError){
+        print(onError);
+      });
     }
   }
+
 }
 
-class MessagePage extends StatefulWidget {
-  final User you;
-  final User yourFriend;
+class MessagePage extends StatelessWidget {
+  User you;
+  User yourFriend;
 
-  MessagePage({required this.you, required this.yourFriend, Key? key}) : super(key: key);
+  MessagePage({required this.you, required this.yourFriend, super.key});
 
-  @override
-  State<MessagePage> createState() => _MessagePageState();
-}
-
-class _MessagePageState extends State<MessagePage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _scrollToBottom({bool isAnimate = true}) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        if (isAnimate) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        } else {
-          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-        }
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         backgroundColor: Colors.white10,
-        appBar: AppBar(
-          backgroundColor: Colors.white10,
-          elevation: 0,
-          leading: const BackButton(color: Colors.white70),
-          title: Row(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage: NetworkImage(widget.yourFriend.image!),
-                onBackgroundImageError: (exception, stackTrace) {
-                  // Xử lý lỗi load ảnh ở đây
-                },
-              ),
-              const SizedBox(width: 8),
-              Text(
-                widget.yourFriend.fullName!,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  decoration: TextDecoration.none,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.phone, color: Colors.white70),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: Consumer<MessageProvider>(
-                builder: (context, messageProvider, child) {
-                  final messages = messageProvider.messages;
-                  _scrollToBottom(isAnimate: false);
-                  return ListView.separated(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(8.0),
-                    itemCount: messages.length,
-                    separatorBuilder: (context, index) =>
-                    const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final message = messages[index];
-                      final isMyMessage =
-                          message.userSendMessage.userId == widget.you.userId &&
-                              message.userReceiveMessage.userId ==
-                                  widget.yourFriend.userId;
-                      return Align(
-                        alignment: isMyMessage
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: isMyMessage
-                            ? _buildMyMessage(message)
-                            : _buildFriendMessage(message),
-                      );
+        body: Consumer<MessageProvider>(
+            builder: (context, messageProvider, child) {
+              // Gọi lại API mỗi khi cần
+              messageProvider.initialize();
+              return Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.white24, width: 2.0), // Border phía dưới
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const BackButton(),
+                        ClipOval(
+                          child: Image.network(
+                            '${yourFriend.image}',
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Khoảng cách giữa ảnh và tên
+                        Text(
+                          '${yourFriend.fullName}',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        const Spacer(),
+                        // Đẩy các thành phần còn lại sang bên phải
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Icon(Icons.phone),
+                        ),
+                      ],
+                    ),
+                  ),
+                  FutureBuilder<List<Message>>(
+                    future: messageProvider.futureMessage,
+                    // Future lấy từ hàm getAllPosts
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child:
+                          CircularProgressIndicator(), // Hiển thị khi đang tải
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text('Có lỗi xảy ra: ${snapshot.error}'),
+                        );
+                      } else if (snapshot.hasData) {
+                        List<Message> messages = snapshot.data!;
+
+                        // Sau khi tải xong, cuộn đến cuối danh sách
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _scrollController.animateTo(
+                            _scrollController.position.maxScrollExtent,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        });
+
+                        // Nếu có dữ liệu, hiển thị danh sách tin nhắn
+                        return Expanded(
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            itemCount: messages.length,
+                            itemBuilder: (context, index) {
+                              Message message = messages[index];
+                              // Xác định xem tin nhắn là của bạn hay của bạn bè
+                              bool isMyMessage =
+                                  message.userSendMessage.userId == you.userId &&
+                                      message.userReceiveMessage.userId ==
+                                          yourFriend.userId;
+                              bool isFriendMessage = message
+                                  .userSendMessage.userId ==
+                                  yourFriend.userId &&
+                                  message.userReceiveMessage.userId == you.userId;
+
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 4.0, horizontal: 8.0),
+                                child: Column(
+                                  crossAxisAlignment: isMyMessage
+                                      ? CrossAxisAlignment
+                                      .end // Tin nhắn của bạn căn phải
+                                      : CrossAxisAlignment.start,
+                                  // Tin nhắn bạn bè căn trái
+                                  children: [
+                                    if (isMyMessage)
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.orangeAccent,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          message.content,
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              decoration: TextDecoration.none),
+                                        ),
+                                      ),
+                                    if (isFriendMessage)
+                                      Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 18,
+                                            child: ClipOval(
+                                              child: Image.network(
+                                                '${yourFriend.image}',
+                                                fit: BoxFit.contain,
+                                                // Điều chỉnh fit
+                                                width: 36,
+                                                // Kích thước ảnh (phải khớp với radius)
+                                                height: 36,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          // Khoảng cách giữa ảnh và nội dung
+                                          Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[200],
+                                              borderRadius:
+                                              BorderRadius.circular(12),
+                                            ),
+                                            child: Text(
+                                              message.content,
+                                              style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 18),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      } else {
+                        return const Center(child: Text('No data found'));
+                      }
                     },
-                  );
-                },
-              ),
-            ),
-            _buildInputField(context),
-          ],
-        ),
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _messageController,
+                              decoration: const InputDecoration(
+                                hintText: 'Nhập tin nhắn...',
+                              ),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          Material(
+                            color: Colors.transparent, // Không làm nền của Material thay đổi màu
+                            shape: const CircleBorder(), // Tạo hình tròn cho vật liệu
+                            child: InkWell(
+                              onTap: () {
+                                messageProvider.sendMessage(you,yourFriend,_messageController.text.trim());
+                                _messageController.clear();
+                              },
+                              borderRadius: BorderRadius.circular(30), // Đảm bảo có border tròn khi nhấn
+                              child: Container(
+                                padding: const EdgeInsets.all(10), // Thêm padding để tạo không gian cho icon
+                                decoration: const BoxDecoration(
+                                  color: Colors.blue, // Màu nền khi không nhấn
+                                  shape: BoxShape.circle, // Đảm bảo nút có hình tròn
+                                ),
+                                child: const Icon(
+                                  Icons.send,
+                                  color: Colors.white, // Màu icon
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                  ),
+                ],
+              );
+            }),
       ),
     );
   }
 
-  Widget _buildMyMessage(Message message) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.orangeAccent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        message.content,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-        ),
-      ),
-    );
-  }
 
-  Widget _buildFriendMessage(Message message) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        CircleAvatar(
-          radius: 18,
-          backgroundImage: NetworkImage(widget.yourFriend.image!),
-          onBackgroundImageError: (exception, stackTrace) {
-            // Xử lý lỗi load ảnh ở đây
-          },
-        ),
-        const SizedBox(width: 8),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            message.content,
-            style: const TextStyle(color: Colors.black, fontSize: 18),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInputField(BuildContext context) {
-    final messageProvider = Provider.of<MessageProvider>(context, listen: false);
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: const InputDecoration(
-                hintText: 'Nhập tin nhắn...',
-                hintStyle: TextStyle(color: Colors.white70),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.white24,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              ),
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Material(
-            color: Colors.transparent,
-            shape: const CircleBorder(),
-            child: InkWell(
-              onTap: () async {
-                final content = _messageController.text.trim();
-                if (content.isNotEmpty) {
-                  await messageProvider.sendMessage(
-                      widget.you, widget.yourFriend, content);
-                  _messageController.clear();
-                  _scrollToBottom(); // Cuộn xuống dưới cùng sau khi gửi tin nhắn
-                }
-              },
-              borderRadius: BorderRadius.circular(30),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.send,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
