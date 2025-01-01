@@ -6,6 +6,7 @@ import 'dart:io';
 import '../ApiService/ApiService.dart';
 import '../DTO/UpdateUserDTO.dart';
 import '../models/DefaultAvatar.dart';
+import '../models/Theme.dart';
 import '../models/User.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -117,6 +118,7 @@ class _ProfilePage extends State<ProfilePage> {
   Widget build(BuildContext context) {
 
     final userProvider = Provider.of<UserProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     Widget _buildSection({required String title, required List<Widget> children}) {
       return Card(
@@ -134,15 +136,15 @@ class _ProfilePage extends State<ProfilePage> {
                 children: [
                   IconButton(
                     iconSize: 28,
-                    icon: const Icon(Icons.refresh,color: Colors.white,),
+                    icon: Icon(Icons.refresh,color: themeProvider.textColor,),
                     onPressed: userProvider._resetUserData
                   ),
                 ],
               ),
               Text(
                 title,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: themeProvider.textProfile,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -154,10 +156,8 @@ class _ProfilePage extends State<ProfilePage> {
         ),
       );
     }
-
-
     return Scaffold(
-      backgroundColor: Colors.white12,
+      backgroundColor: themeProvider.theme,
       body: Stack(
         children: [
           // Background Image
@@ -185,7 +185,7 @@ class _ProfilePage extends State<ProfilePage> {
                       backgroundImage: userProvider.profileImage != null
                           ? FileImage(userProvider.profileImage!)
                           : NetworkImage(userProvider.user?.image ?? Images.defaultImage),
-                      backgroundColor: Colors.white,
+                      backgroundColor: themeProvider.textColor,
                     ),
                   ),
                 ),
@@ -237,10 +237,10 @@ class _ProfilePage extends State<ProfilePage> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(12),
-                                      gradient: const LinearGradient(
+                                      gradient: LinearGradient(
                                         begin: Alignment.centerLeft, // Gradient start
                                         end: Alignment.centerRight, // Gradient end
-                                        colors: [Colors.white, Colors.black], // Gradient from white to black
+                                        colors: [themeProvider.textColor, Colors.black], // Gradient from white to black
                                       ),
                                     ),
                                   ),
@@ -256,9 +256,9 @@ class _ProfilePage extends State<ProfilePage> {
                                     ),
                                     elevation: 0, // No default shadow for the button
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'Update Profile',
-                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: themeProvider.textColor),
                                   ),
                                 ),
                               ],
@@ -369,15 +369,18 @@ class _ProfilePage extends State<ProfilePage> {
 
 
   Widget _buildDetailRow(BuildContext context, String label, String value, TextEditingController? controller, String field) {
+
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: themeProvider.textProfile,
               fontSize: 16,
             ),
           ),
@@ -387,23 +390,23 @@ class _ProfilePage extends State<ProfilePage> {
                 ? Center(
               child: Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
-                  color: Colors.white,
+                  color: themeProvider.textProfile,
                 ),
               ),
             )
                 : Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
-                color: Colors.white,
+                color: themeProvider.textProfile,
               ),
             ),
           ),
           if (controller != null)
             IconButton(
-              icon: const Icon(Icons.edit, color: Colors.white),
+              icon: Icon(Icons.edit, color: themeProvider.textProfile),
               onPressed: () {
                 _showEditDialog(context, controller, field);
               },

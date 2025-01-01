@@ -9,6 +9,7 @@ import 'package:social_network_project/models/CheckURL.dart';
 import '../ApiService/ApiService.dart';
 import '../models/EmojiUtil.dart';
 import '../models/Message.dart';
+import '../models/Theme.dart';
 import '../models/User.dart';
 
 class MessageProvider extends ChangeNotifier {
@@ -142,10 +143,12 @@ class MessagePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        backgroundColor: Colors.white10,
+        backgroundColor: themeProvider.theme,
         body: Consumer<MessageProvider>(
           builder: (context, messageProvider, child) {
             messageProvider.initialize();
@@ -153,9 +156,9 @@ class MessagePage extends StatelessWidget {
               children: [
                 Container(
                   margin: const EdgeInsets.only(bottom: 12),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
-                      bottom: BorderSide(color: Colors.white24, width: 2.0),
+                      bottom: BorderSide(color: themeProvider.textFeel, width: 2.0),
                     ),
                   ),
                   child: Row(
@@ -172,8 +175,8 @@ class MessagePage extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         '${yourFriend.fullName}',
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: themeProvider.textColor,
                           fontSize: 14,
                           decoration: TextDecoration.none,
                         ),
@@ -235,8 +238,8 @@ class MessagePage extends StatelessWidget {
                                       ),
                                       child: Text(
                                         message.content,
-                                        style: const TextStyle(
-                                          color: Colors.white,
+                                        style: TextStyle(
+                                          color: themeProvider.textColor,
                                           fontSize: 18,
                                           decoration: TextDecoration.none,
                                         ),
@@ -315,13 +318,13 @@ class MessagePage extends StatelessWidget {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.emoji_emotions, color: Colors.white),
+                        icon: Icon(Icons.emoji_emotions, color: themeProvider.textColor),
                         onPressed: () {
                           messageProvider.toggleEmojiPicker();
                         },
                       ),
                       IconButton(
-                        icon: const Icon(Icons.camera_alt, color: Colors.white),
+                        icon: Icon(Icons.camera_alt, color: themeProvider.textColor),
                         onPressed: () {
                           _showImageOptions(context);
                         },
@@ -361,7 +364,7 @@ class MessagePage extends StatelessWidget {
                               decoration: const InputDecoration(
                                 hintText: 'Nhập tin nhắn...',
                               ),
-                              style: const TextStyle(color: Colors.white),
+                              style: TextStyle(color: themeProvider.textColor),
                               onChanged: (text) {
                                 _messageController.value = _messageController.value.copyWith(
                                   text: messageProvider.emojify(text),
@@ -388,9 +391,9 @@ class MessagePage extends StatelessWidget {
                               color: Colors.blue,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.send,
-                              color: Colors.white,
+                              color: themeProvider.textColor,
                             ),
                           ),
                         ),

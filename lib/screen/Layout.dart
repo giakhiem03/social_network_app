@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:social_network_project/screen/DrawerPage.dart';
 import 'package:social_network_project/screen/ListSearchPage.dart';
 
+import '../models/Theme.dart';
 import '../models/User.dart';
 import 'FriendRequestPage.dart';
 import 'HomePage.dart';
@@ -11,6 +12,7 @@ import 'LoginPage.dart';
 import 'ListMessagePage.dart';
 import 'NotificationPage.dart';
 import 'ProfilePage.dart';
+import 'SettingsPage.dart';
 
 class Layout extends StatefulWidget {
 
@@ -37,14 +39,16 @@ class _Layout extends State<Layout> {
 
     final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
     final user = userProvider.user;
+
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     final List<Widget> _contentWidgets = [
       const HomePage(),
       NotificationPage(),
       const ListMessagePage(),
       const FriendRequestPage(),
       ProfilePage(),
-      const Center(child: Text('4', style: TextStyle(fontSize: 24))),
-      const Center(child: Text('Settings Content', style: TextStyle(fontSize: 24))),
+      const SettingsPage(),
     ];
     if (user!.status==false) {
       Future.microtask(() {
@@ -60,7 +64,7 @@ class _Layout extends State<Layout> {
         // Gán key cho Scaffold
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          backgroundColor: Colors.white10,
+          backgroundColor: themeProvider.theme,
           leading: IconButton(
             icon: const Icon(Icons.menu, color: Colors.deepOrangeAccent),
             onPressed: () {
@@ -89,15 +93,15 @@ class _Layout extends State<Layout> {
                       borderSide: BorderSide.none
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: Colors.white, // Màu viền khi focus
+                    borderSide: BorderSide(
+                      color: themeProvider.textColor, // Màu viền khi focus
                       width: 1, // Độ dày viền khi focus
                     ),
                     borderRadius: BorderRadius.circular(
                         50), // Giữ góc bo tròn
                   ),
                 ),
-                style: GoogleFonts.dynaPuff(color: Colors.white),
+                style: GoogleFonts.dynaPuff(color: themeProvider.textColor),
                 onChanged: searchInput,
             )
           ),

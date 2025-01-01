@@ -11,6 +11,7 @@ import 'package:social_network_project/models/Post.dart';
 import '../models/CheckURL.dart';
 import '../models/DefaultAvatar.dart';
 import '../models/EmojiUtil.dart';
+import '../models/Theme.dart';
 import 'PostPage.dart';
 import 'ProfilePage.dart';
 
@@ -60,7 +61,6 @@ class HomeProvider extends ChangeNotifier {
         scrollControllers = List.generate(posts.length, (index) => ScrollController());
 
         for (var post in posts) {
-          scrollControllers[post.postId!] =  ScrollController();
           postCommentToggle[post.postId!] = false;
         }
       }).catchError((error){print("Error: $error");} );
@@ -200,9 +200,7 @@ class HomeProvider extends ChangeNotifier {
       });
     }
   }
-
 }
-
 
 class HomePage extends StatelessWidget {
 
@@ -214,11 +212,13 @@ class HomePage extends StatelessWidget {
 
     final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
     final user = userProvider.user;
+
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Consumer<HomeProvider>(builder: (context, homeProvider, child) {
       return Column(
         children: [
           Container(
-            color: Colors.white10,
+            color: themeProvider.theme,
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
@@ -239,9 +239,9 @@ class HomePage extends StatelessWidget {
                           ),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         'Hãy chia sẽ cảm xúc của bạn!',
-                        style: TextStyle(color: Colors.white38, fontSize: 15),
+                        style: TextStyle(color: themeProvider.textFeel, fontSize: 15),
                       ),
                     ),
                   ],
@@ -269,7 +269,7 @@ class HomePage extends StatelessWidget {
                       Post post = posts[index];
 
                       return Container(
-                        color: Colors.white10,
+                        color: themeProvider.theme,
                         margin: const EdgeInsets.only(top: 6, bottom: 6),
                         padding: const EdgeInsets.only(left: 20, right: 20),
                         child: Column(
@@ -295,17 +295,17 @@ class HomePage extends StatelessWidget {
                                         post.userUpLoad.fullName ??
                                             post.userUpLoad.username,
                                         style:
-                                        const TextStyle(color: Colors.white)),
+                                        TextStyle(color: themeProvider.textColor)),
                                     Text(post.postedTime,
                                         style:
-                                        const TextStyle(color: Colors.white)),
+                                        TextStyle(color: themeProvider.textColor)),
                                   ],
                                 ),
                               ],
                             ),
                             const SizedBox(height: 18),
                             Text('${post.caption}',
-                                style: const TextStyle(color: Colors.white)),
+                                style: TextStyle(color: themeProvider.textColor)),
                             const SizedBox(height: 18),
                             post.postImage != null
                                 ? ClipRRect(
@@ -334,14 +334,14 @@ class HomePage extends StatelessWidget {
                                     size: 20,
                                     color: Colors.red,
                                   ),
-                                  label: const Text(
+                                  label: Text(
                                     "Thích",
-                                    style: TextStyle(color: Colors.white54),
+                                    style: TextStyle(color: themeProvider.textColor),
                                   ),
                                   style: ButtonStyle(
                                     backgroundColor:
                                     WidgetStateProperty.all(
-                                        Colors.white12),
+                                        themeProvider.theme),
                                   ),
                                 )
                                     : ElevatedButton.icon(
@@ -354,14 +354,14 @@ class HomePage extends StatelessWidget {
                                     size: 20,
                                     color: Colors.white54,
                                   ),
-                                  label: const Text(
+                                  label: Text(
                                     "Thích",
-                                    style: TextStyle(color: Colors.white54),
+                                    style: TextStyle(color: themeProvider.textColor),
                                   ),
                                   style: ButtonStyle(
                                     backgroundColor:
                                     WidgetStateProperty.all(
-                                        Colors.white12),
+                                        themeProvider.theme),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -370,21 +370,21 @@ class HomePage extends StatelessWidget {
                                     homeProvider.toggleComment(post.postId!);
 
                                   },
-                                  icon: const Icon(
+                                  icon: Icon(
                                     FontAwesomeIcons.comment,
                                     size: 20,
-                                    color: Colors.white54,
+                                    color: themeProvider.textColor,
                                   ),
                                   style: ButtonStyle(
                                     backgroundColor:
-                                    WidgetStateProperty.all(Colors.white12),
+                                    WidgetStateProperty.all(themeProvider.theme),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
-                                    color: Colors.white12,
+                                    color: themeProvider.theme,
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Row(
@@ -397,8 +397,8 @@ class HomePage extends StatelessWidget {
                                       const SizedBox(width: 6),
                                       Text(
                                         '${post.reactionQuantity}',
-                                        style: const TextStyle(
-                                            color: Colors.white54),
+                                        style: TextStyle(
+                                            color: themeProvider.textColor),
                                       ),
                                     ],
                                   ),
@@ -427,8 +427,8 @@ class HomePage extends StatelessWidget {
                                           List<Comments> comments = snapshot.data!;
 
                                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                                            homeProvider.scrollControllers[post.postId!].
-                                            jumpTo(homeProvider.scrollControllers[post.postId!].
+                                            homeProvider.scrollControllers[index].
+                                            jumpTo(homeProvider.scrollControllers[index].
                                             position.maxScrollExtent * 1.4);
                                           });
                                           return Container(
@@ -436,7 +436,7 @@ class HomePage extends StatelessWidget {
                                               maxHeight: 220
                                             ),
                                             child: ListView.builder(
-                                              controller: homeProvider.scrollControllers[post.postId!],
+                                              controller: homeProvider.scrollControllers[index],
                                               itemCount: comments.length,
                                               shrinkWrap: true,
                                               physics: const AlwaysScrollableScrollPhysics(),
@@ -447,7 +447,7 @@ class HomePage extends StatelessWidget {
                                                     margin: const EdgeInsets.only(top: 6, bottom: 6),
                                                     padding: const EdgeInsets.all(10),
                                                     decoration: BoxDecoration(
-                                                      color: Colors.white12,
+                                                      color: themeProvider.theme,
                                                       borderRadius: BorderRadius.circular(10),
                                                     ),
                                                       child: Row(
@@ -465,7 +465,7 @@ class HomePage extends StatelessWidget {
                                                                 // Tên người dùng
                                                                 Text(
                                                                   cmt.user.fullName ?? cmt.user.username,
-                                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                                  style: TextStyle(color: themeProvider.textColor, fontWeight: FontWeight.bold),
                                                                 ),
                                                                 const SizedBox(width: 10), // Tạo khoảng cách giữa tên người dùng và ảnh
                                                                 // Hình ảnh trong comment
@@ -487,13 +487,13 @@ class HomePage extends StatelessWidget {
                                                                 // Tên người dùng
                                                                 Text(
                                                                   cmt.user.fullName ?? cmt.user.username,
-                                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                                  style: TextStyle(color: themeProvider.textColor, fontWeight: FontWeight.bold),
                                                                 ),
                                                                 const SizedBox(height: 2),
                                                                 // Nội dung bình luận
                                                                 Text(
                                                                   cmt.content,
-                                                                  style: const TextStyle(color: Colors.white),
+                                                                  style: TextStyle(color: themeProvider.textColor),
                                                                 ),
                                                               ],
                                                             ),
@@ -509,9 +509,9 @@ class HomePage extends StatelessWidget {
                                           )
                                           ;
                                         } else {
-                                          return const Text(
+                                          return Text(
                                             "Không có bình luận nào.",
-                                            style: TextStyle(color: Colors.white54),
+                                            style: TextStyle(color: themeProvider.textColor),
                                           );
                                         }
                                       },
@@ -571,9 +571,9 @@ class HomePage extends StatelessWidget {
                                                     homeProvider.sendComment(comment);
                                                     homeProvider.clearCmts(index);
                                                   },
-                                                  icon: const Icon(
+                                                  icon: Icon(
                                                     FontAwesomeIcons.paperPlane,
-                                                    color: Colors.white,
+                                                    color: themeProvider.textColor,
                                                   ),
                                                 ),
                                               ],
@@ -592,22 +592,22 @@ class HomePage extends StatelessWidget {
                                             selection: TextSelection.collapsed(offset: text.length),
                                           );
                                         },
-                                        style: const TextStyle(color: Colors.white),
+                                        style: TextStyle(color: themeProvider.textColor),
                                         decoration: InputDecoration(
                                           hintText: "Viết bình luận...",
-                                          hintStyle: const TextStyle(color: Colors.white54),
+                                          hintStyle: TextStyle(color: themeProvider.textColor),
                                           suffixIcon: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               IconButton(
                                                 onPressed: homeProvider.toggleEmojiPicker,
-                                                icon: const Icon(
+                                                icon: Icon(
                                                   Icons.insert_emoticon,
-                                                  color: Colors.white,
+                                                  color: themeProvider.textColor,
                                                 ),
                                               ),
                                               IconButton(
-                                                icon: const Icon(Icons.camera_alt, color: Colors.white),
+                                                icon: Icon(Icons.camera_alt, color: themeProvider.textColor),
                                                 onPressed: () {
                                                   homeProvider._showImageOptions(context);
                                                 },
@@ -622,9 +622,9 @@ class HomePage extends StatelessWidget {
                                                   homeProvider.sendComment(comment);
                                                   homeProvider.clearCmts(index);
                                                 },
-                                                icon: const Icon(
+                                                icon: Icon(
                                                   FontAwesomeIcons.paperPlane,
-                                                  color: Colors.white,
+                                                  color: themeProvider.textColor,
                                                 ),
                                               ),
                                             ],

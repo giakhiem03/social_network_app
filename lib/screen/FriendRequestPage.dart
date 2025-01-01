@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:social_network_project/models/Theme.dart';
 
 import '../ApiService/ApiService.dart';
 import '../models/Friends.dart';
@@ -42,19 +43,19 @@ class _FriendRequestPage extends State<FriendRequestPage> {
 
     final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
     final user = userProvider.user;
-
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-      backgroundColor: Colors.white10,
+      backgroundColor: themeProvider.theme,
       body: Column(
         children: [
           // Tiêu đề
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(height: 60),
               Text(
                 'Lời mời kết bạn',
-                style: TextStyle(color: Colors.white70, fontSize: 26),
+                style: TextStyle(color: themeProvider.textColor, fontSize: 26),
               ),
             ],
           ),
@@ -66,7 +67,7 @@ class _FriendRequestPage extends State<FriendRequestPage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('Lỗi: ${snapshot.error}',style: const TextStyle(color: Colors.white70),));
+                  return Center(child: Text('Lỗi: ${snapshot.error}',style: TextStyle(color: themeProvider.textColor),));
                 } else if (snapshot.hasData || snapshot.data!.isNotEmpty) {
                   // ListView.builder hiển thị các thông báo
                   return ListView.builder(
@@ -90,7 +91,7 @@ class _FriendRequestPage extends State<FriendRequestPage> {
                             ),
                             const SizedBox(width: 8),
                             Text( '${friend.userIdSend.fullName} đã gửi cho bạn lời mời kết bạn',
-                              style: const TextStyle(color: Colors.white70),
+                              style:  TextStyle(color: themeProvider.textColor),
                             ),
                             IconButton(onPressed: ()=>acceptFriends(friend.id!), icon:const Icon(Icons.check, color: Colors.green,))
                           ],
@@ -99,7 +100,7 @@ class _FriendRequestPage extends State<FriendRequestPage> {
                     },
                   );
                 } else {
-                  return const Center(child: Text('Không có lời mời kết bạn nào',style: TextStyle(color: Colors.white70),));
+                  return Center(child: Text('Không có lời mời kết bạn nào',style: TextStyle(color: themeProvider.textColor),));
                 }
               },
             ),

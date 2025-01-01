@@ -6,6 +6,7 @@ import 'package:social_network_project/models/Friends.dart';
 import 'package:social_network_project/models/User.dart';
 
 import '../ApiService/ApiService.dart';
+import '../models/Theme.dart';
 
 class SearchProvider extends ChangeNotifier {
   ApiService apiService = ApiService();
@@ -88,25 +89,27 @@ class ListSearchPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Consumer<SearchProvider>(
       builder: (context, searchProvider, child) {
         return SafeArea(
           child: Scaffold(
-            backgroundColor: Colors.white10,
+            backgroundColor: themeProvider.theme,
             body: Column(
               children: [
                 // Tiêu đề
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    BackButton(),
-                    SizedBox(
+                    const BackButton(),
+                    const SizedBox(
                       height: 80,
                       width: 26,
                     ),
                     Text(
                       'Danh sách tìm kiếm',
-                      style: TextStyle(color: Colors.white70, fontSize: 26),
+                      style: TextStyle(color: themeProvider.textColor, fontSize: 26),
                     ),
                   ],
                 ),
@@ -123,8 +126,8 @@ class ListSearchPage extends StatelessWidget {
                       } else if (snapshot.hasError) {
                         return Center(
                           child: Text(
-                            'Lỗi: ${snapshot.error}',
-                            style: const TextStyle(color: Colors.white70),
+                            'Không tìm thấy người dùng nào có tên là $name',
+                            style: TextStyle(color: themeProvider.textColor),
                           ),
                         );
                       } else if (snapshot.hasData) {
@@ -135,7 +138,7 @@ class ListSearchPage extends StatelessWidget {
                           return Center(
                             child: Text(
                               'Không tìm thấy người dùng nào có tên là $name',
-                              style: const TextStyle(color: Colors.white70),
+                              style: TextStyle(color: themeProvider.textColor),
                             ),
                           );
                         }
@@ -161,7 +164,7 @@ class ListSearchPage extends StatelessWidget {
                                   const SizedBox(width: 20),
                                   Text(
                                     user.fullName!,
-                                    style: const TextStyle(color: Colors.white70),
+                                    style: TextStyle(color: themeProvider.textColor),
                                   ),
                                   const Spacer(),
                                   IconButton(
@@ -206,10 +209,10 @@ class ListSearchPage extends StatelessWidget {
                           },
                         );
                       } else {
-                        return const Center(
+                        return Center(
                           child: Text(
                             'Không có dữ liệu',
-                            style: TextStyle(color: Colors.white70),
+                            style: TextStyle(color: themeProvider.textColor),
                           ),
                         );
                       }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
 import 'package:social_network_project/models/Notifications.dart';
 
+import '../models/Theme.dart';
 import '../models/User.dart';
 import 'ProfilePage.dart';
 
@@ -31,18 +32,19 @@ class _NotificationPage extends State<NotificationPage> {
     final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
     final user = userProvider.user;
 
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-      backgroundColor: Colors.white10,
+      backgroundColor: themeProvider.theme,
       body: Column(
         children: [
           // Tiêu đề
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 60),
+              const SizedBox(height: 60),
               Text(
                 'Thông Báo',
-                style: TextStyle(color: Colors.white70, fontSize: 26),
+                style: TextStyle(color: themeProvider.textColor, fontSize: 26),
               ),
             ],
           ),
@@ -54,7 +56,7 @@ class _NotificationPage extends State<NotificationPage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('Lỗi: ${snapshot.error}',style: const TextStyle(color: Colors.white70),));
+                  return Center(child: Text('Lỗi: ${snapshot.error}',style: TextStyle(color: themeProvider.textColor),));
                 } else if (snapshot.hasData || snapshot.data!.isNotEmpty) {
                   // ListView.builder hiển thị các thông báo
                   return ListView.builder(
@@ -79,13 +81,13 @@ class _NotificationPage extends State<NotificationPage> {
                                 children: [
                                   Text(
                                     notification.userIdSend.fullName!, // Hiển thị tên người dùng
-                                    style: const TextStyle(color: Colors.white70),
+                                    style: TextStyle(color: themeProvider.textColor),
                                   ),
                                   notification.notificationCategory.id == 1 ?
                                   Text( '${notification.userIdSend.fullName} đã like bài viết của bạn',
-                                    style: const TextStyle(color: Colors.white70),
+                                    style: TextStyle(color: themeProvider.textColor),
                                   ) :
-                                  Text( '${notification.userIdSend.fullName} đã bình luận bài viết của bạn',style: const TextStyle(color: Colors.white70),),
+                                  Text( '${notification.userIdSend.fullName} đã bình luận bài viết của bạn',style: TextStyle(color: themeProvider.textColor),),
                                 ],
                               ),
                             ],
@@ -94,7 +96,7 @@ class _NotificationPage extends State<NotificationPage> {
                     },
                   );
                 } else {
-                  return const Center(child: Text('Không có thông báo nào',style: TextStyle(color: Colors.white70),));
+                  return Center(child: Text('Không có thông báo nào',style: TextStyle(color: themeProvider.textColor),));
                 }
               },
             ),

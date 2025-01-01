@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
 import 'package:social_network_project/models/Post.dart';
 
+import '../models/Theme.dart';
 import '../models/User.dart';
 import 'Layout.dart';
 
@@ -72,22 +74,25 @@ class _PostPage extends State<PostPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Colors.white,
+          color: themeProvider.textColor,
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.public,
-              color: Colors.white,
+              color: themeProvider.textColor,
             ),
             const SizedBox(width: 10),
-            Text('Công khai', style: GoogleFonts.chewy(color: Colors.white)),
+            Text('Công khai', style: GoogleFonts.chewy(color: themeProvider.textColor)),
             Expanded(
               // Use Expanded to push the 'data' text to the end
               child: Row(
@@ -97,7 +102,7 @@ class _PostPage extends State<PostPage> {
                     icon: const Icon(Icons.send),
                     color: valueExist || _selectedImage != null
                         ? Colors.orangeAccent
-                        : Colors.white54,
+                        : themeProvider.textColor,
                     onPressed: valueExist || _selectedImage != null
                         ? UploadPost
                         : null,
@@ -107,7 +112,7 @@ class _PostPage extends State<PostPage> {
             ),
           ],
         ),
-        backgroundColor: Colors.white54,
+        backgroundColor: themeProvider.textFeel,
       ),
       backgroundColor: Colors.black,
       body: SingleChildScrollView(
@@ -127,7 +132,7 @@ class _PostPage extends State<PostPage> {
                     ),
                     hintText: 'Chia sẻ cảm xúc của bạn!',
                   ),
-                  style: GoogleFonts.dynaPuff(color: Colors.white70),
+                  style: GoogleFonts.dynaPuff(color: themeProvider.textFeel),
                   onChanged: (value) {
                     setState(() {
                       valueExist = _PostInput.text.trim().isNotEmpty;
@@ -161,7 +166,7 @@ class _PostPage extends State<PostPage> {
                   child: IconButton(
                     onPressed: () => _pickImage(ImageSource.gallery),
                     icon: const Icon(Icons.photo_library),
-                    color: Colors.white,
+                    color: themeProvider.textColor,
                   ),
                 ),
                 const SizedBox(width: 20,),
@@ -174,7 +179,7 @@ class _PostPage extends State<PostPage> {
                   child: IconButton(
                     onPressed: () => _pickImage(ImageSource.camera),
                     icon: const Icon(Icons.camera_alt),
-                    color: Colors.white, // Icon color
+                    color: themeProvider.textColor, // Icon color
                   ),
                 ),
                 const SizedBox(width: 30,)

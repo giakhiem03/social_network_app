@@ -374,6 +374,7 @@ class ApiService {
      try {
        var uri = Uri.parse('$baseUrl/search/$name');
        final response = await http.get(uri);
+       print(response.statusCode);
        if(response.statusCode == 200) {
          List jsonData = json.decode(response.body);
          return jsonData.map((user)=> User.fromJson(user)).toList();
@@ -381,7 +382,7 @@ class ApiService {
          throw Exception('Failed to load notes');
        }
      }catch(e){
-       throw Exception('Failed to load users catch');
+       throw Exception('Không tìm thấy người dùng');
      }
   }
 

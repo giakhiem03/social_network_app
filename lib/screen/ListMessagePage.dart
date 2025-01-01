@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../ApiService/ApiService.dart';
 import '../models/Friends.dart';
+import '../models/Theme.dart';
 import '../models/User.dart';
 import 'MessagePage.dart';
 import 'ProfilePage.dart';
@@ -37,18 +38,19 @@ class _ListMessagePage extends State<ListMessagePage> {
     final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
     final user = userProvider.user;
 
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-      backgroundColor: Colors.white10,
+      backgroundColor: themeProvider.theme,
       body: Column(
         children: [
           // Tiêu đề
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 60),
+              const SizedBox(height: 60),
               Text(
                 'Tin nhắn',
-                style: TextStyle(color: Colors.white70, fontSize: 26),
+                style: TextStyle(color: themeProvider.textColor, fontSize: 26),
               ),
             ],
           ),
@@ -60,7 +62,7 @@ class _ListMessagePage extends State<ListMessagePage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('Lỗi: ${snapshot.error}',style: const TextStyle(color: Colors.white70),));
+                  return Center(child: Text('Lỗi: ${snapshot.error}',style: TextStyle(color: themeProvider.textColor),));
                 } else if (snapshot.hasData || snapshot.data!.isNotEmpty) {
                   // ListView.builder hiển thị các thông báo
                   return ListView.builder(
@@ -77,7 +79,7 @@ class _ListMessagePage extends State<ListMessagePage> {
                                     MessagePage(you: user,yourFriend: friend.userIdReceive,)));
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white38,
+                            backgroundColor: themeProvider.textColor,
                             padding: EdgeInsets.zero, // Remove default padding to control it in the Container
                             elevation: 5, // Add some shadow to elevate the button
                             shape: RoundedRectangleBorder(
@@ -98,8 +100,8 @@ class _ListMessagePage extends State<ListMessagePage> {
                                 Expanded( // Use Expanded to make text take remaining space
                                   child: Text(
                                     '${friend.userIdReceive.fullName}', // Display friend's full name
-                                    style: const TextStyle(
-                                      color: Colors.orangeAccent, // Light text color for contrast
+                                    style: TextStyle(
+                                      color: themeProvider.textFullName, // Light text color for contrast
                                       fontSize: 16, // Adjust font size for better readability
                                       fontWeight: FontWeight.w500, // Make the text bold for better clarity
                                     ),
@@ -120,7 +122,7 @@ class _ListMessagePage extends State<ListMessagePage> {
                                     MessagePage(you: user,yourFriend: friend.userIdSend,)));
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white38,
+                            backgroundColor: themeProvider.textColor,
                             padding: EdgeInsets.zero, // Remove default padding to control it in the Container
                             elevation: 5, // Add some shadow to elevate the button
                             shape: RoundedRectangleBorder(
@@ -141,8 +143,8 @@ class _ListMessagePage extends State<ListMessagePage> {
                                 Expanded( // Use Expanded to make text take remaining space
                                   child: Text(
                                     '${friend.userIdReceive.fullName}', // Display friend's full name
-                                    style: const TextStyle(
-                                      color: Colors.orangeAccent, // Light text color for contrast
+                                    style: TextStyle(
+                                      color: themeProvider.textFullName, // Light text color for contrast
                                       fontSize: 16, // Adjust font size for better readability
                                       fontWeight: FontWeight.w500, // Make the text bold for better clarity
                                     ),
@@ -157,7 +159,7 @@ class _ListMessagePage extends State<ListMessagePage> {
                     },
                   );
                 } else {
-                  return const Center(child: Text('Không có lời mời kết bạn nào',style: TextStyle(color: Colors.white70),));
+                  return Center(child: Text('Không có lời mời kết bạn nào',style: TextStyle(color: themeProvider.textColor),));
                 }
               },
             ),
