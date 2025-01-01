@@ -429,7 +429,7 @@ class HomePage extends StatelessWidget {
                                           WidgetsBinding.instance.addPostFrameCallback((_) {
                                             homeProvider.scrollControllers[index].
                                             jumpTo(homeProvider.scrollControllers[index].
-                                            position.maxScrollExtent * 1.4);
+                                            position.maxScrollExtent * 2.3);
                                           });
                                           return Container(
                                             constraints: const BoxConstraints(

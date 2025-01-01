@@ -19,12 +19,17 @@ class ThemeProvider extends ChangeNotifier {
 
   Color get textFullName => _textFullName;
 
+  bool _isDarkMode = true;
+
+  bool get isDarkMode => _isDarkMode;
 
   Color _textProfile= Colors.black87;
 
   Color get textProfile => _textProfile;
 
   changeTheme(bool mode) {
+    _isDarkMode = mode;
+
     if(mode) {
       _theme = Colors.white10;
       _text =  Colors.white70;
@@ -38,8 +43,8 @@ class ThemeProvider extends ChangeNotifier {
       _textFullName = Colors.white70;
       _textProfile = Colors.white;
     }
-
     notifyListeners();
   }
+
 
 }
