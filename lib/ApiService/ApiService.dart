@@ -10,6 +10,7 @@ import 'package:social_network_project/models/Comments.dart';
 import 'package:social_network_project/models/Friends.dart';
 import 'package:social_network_project/models/Message.dart';
 
+import '../models/EmojiUtil.dart';
 import '../models/Post.dart';
 import '../models/User.dart';
 import '../models/Notifications.dart';
@@ -168,37 +169,32 @@ class ApiService {
     return pickedFile;
   }
 
-  //
-  // Future<void> uploadPost(Post post, File? postImage) async {
-  //   print(post.toJson());  // In ra dữ liệu JSON của bài viết
-  //
-  //   final uri = Uri.parse('$baseUrl/posts');
-  //   var request = http.MultipartRequest('POST', uri)
-  //     ..fields['post'] = jsonEncode(post.toJson());
-  //
-  //   // Chỉ thêm file nếu postImage không phải null
-  //   if (postImage != null) {
-  //     request.files.add(await http.MultipartFile.fromPath(
-  //       'postImage',
-  //       postImage.path,
-  //     ));
-  //   }
-  //
-  //   try {
-  //     var response = await request.send();
-  //
-  //     if (response.statusCode == 200) {
-  //       print('Upload thành công!');
-  //       // Handle successful upload if needed
-  //     } else {
-  //       print('Upload thất bại: ${response.statusCode}');
-  //       throw Exception('Failed to upload post');
-  //     }
-  //   } catch (e) {
-  //     print('Lỗi khi upload: $e');
-  //     throw e; // Rắc rối xảy ra thì ném ra exception để xử lý tiếp theo
-  //   }
-  // }
+  String emojify(String text, {String Function(String)? fnFormat}) {
+    // Xử lý đặc biệt cho <3 trước khi xử lý các emoji khác
+    text = text.replaceAll('<3', '❤️');
+    text = text.replaceAll(':)', '🙂');
+    text = text.replaceAll(':(', '☹️');
+
+    Iterable<Match> matches = RegExp(r':\w+').allMatches(text); // Tìm các từ dạng :emoji_name
+    if (matches.isNotEmpty) {
+      var result = text;
+      for (Match m in matches) {
+        var _e = EmojiUtil.stripColons(m.group(0));
+        if (_e == null || m.group(0) == null) continue;
+        if (EmojiUtil.hasName(_e)) {
+          var pattern = RegExp.escape(m.group(0)!);
+          var formattedCode = EmojiUtil.get(_e)!; // Lấy mã emoji từ tên
+          if (fnFormat != null) {
+            formattedCode = fnFormat(formattedCode);
+          }
+          result =
+              result.replaceAll(RegExp(pattern, unicode: true), formattedCode);
+        }
+      }
+      return result;
+    }
+    return text;
+  }
 
   // Gọi API upload Post
   Future<void> uploadPost(Post post, File? postImage) async {
@@ -308,7 +304,40 @@ class ApiService {
     }
   }
 
-  Future<void> createCmts(Comments comment) async {
+  Future<List<Comments>> createCmts(Comments comment, File? image) async {
+    try {
+
+      String emojifiedContent = emojify(comment.content);
+
+      var uri = Uri.parse('$baseUrl/createCmt');
+
+      var request = http.MultipartRequest('POST', uri);
+
+      request.fields['post'] = '${comment.post.postId}';
+      request.fields['user'] = '${comment.user.userId}';
+      request.fields['content'] = emojifiedContent;
+      if (image != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+            'image', image.path));
+      }
+      var response = await request.send();
+      print(response.statusCode);
+      if(response.statusCode == 200) {
+        // Convert the response body to a string and then parse it
+        String responseBody = await response.stream.bytesToString();
+        List jsonData = json.decode(responseBody);
+
+        return jsonData.map((cmt) => Comments.fromJson(cmt)).toList();
+      } else {
+        throw Exception('Failed to load notes');
+      }
+    } catch(e){
+      throw Exception('Failed to load users catch');
+    }
+
+
+
+
     var uri = Uri.parse('$baseUrl/createCmt');
     final response = await http.post(
       uri,

@@ -2,17 +2,15 @@ import 'dart:io';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
 import 'package:social_network_project/models/Comments.dart';
 import 'package:social_network_project/models/Post.dart';
+import '../models/CheckURL.dart';
 import '../models/DefaultAvatar.dart';
 import '../models/EmojiUtil.dart';
-import '../models/User.dart';
 import 'PostPage.dart';
 import 'ProfilePage.dart';
 
@@ -65,7 +63,7 @@ class HomeProvider extends ChangeNotifier {
           scrollControllers[post.postId!] =  ScrollController();
           postCommentToggle[post.postId!] = false;
         }
-      }).catchError((error) => print("Error: $error"));
+      }).catchError((error){print("Error: $error");} );
       notifyListeners();
     }catch(e) {
       print(e);
@@ -184,6 +182,25 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners(); // Cập nhật lại UI
   }
 
+  void sendComment(Comments comment) {
+    if (comment.content.isNotEmpty && _image == null) {
+      apiService.createCmts(comment, null).then((onValue) {
+        futureCmts = Future.value(onValue);
+        notifyListeners();
+      }).catchError((onError) {
+        print('Có lỗi khi gửi bình luận: $onError');
+      });
+    } else if(_image != null){
+      apiService.createCmts(comment, _image).then((onValue) {
+        futureCmts = Future.value(onValue);
+        _image = null;
+        notifyListeners();
+      }).catchError((onError) {
+        print('Có lỗi khi gửi bình luận: $onError');
+      });
+    }
+  }
+
 }
 
 
@@ -279,7 +296,7 @@ class HomePage extends StatelessWidget {
                                             post.userUpLoad.username,
                                         style:
                                         const TextStyle(color: Colors.white)),
-                                    Text(post.postedTime ?? '',
+                                    Text(post.postedTime,
                                         style:
                                         const TextStyle(color: Colors.white)),
                                   ],
@@ -412,7 +429,7 @@ class HomePage extends StatelessWidget {
                                           WidgetsBinding.instance.addPostFrameCallback((_) {
                                             homeProvider.scrollControllers[post.postId!].
                                             jumpTo(homeProvider.scrollControllers[post.postId!].
-                                            position.maxScrollExtent * 1.5);
+                                            position.maxScrollExtent * 1.4);
                                           });
                                           return Container(
                                             constraints: const BoxConstraints(
@@ -433,27 +450,57 @@ class HomePage extends StatelessWidget {
                                                       color: Colors.white12,
                                                       borderRadius: BorderRadius.circular(10),
                                                     ),
-                                                    child: Row(
-                                                      children: [
-                                                        CircleAvatar(
-                                                          radius: 18,
-                                                          backgroundImage: NetworkImage('${cmt.user.image}'),
-                                                        ),
-                                                        const SizedBox(width: 12),
-                                                        Expanded(
-                                                          child: Column(
-                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                            children: [
-                                                              Text(cmt.user.fullName ?? cmt.user.username,
-                                                                  style: const TextStyle(color: Colors.white)),
-                                                              const SizedBox(height: 2),
-                                                              Text(cmt.content,
-                                                                  style: const TextStyle(color: Colors.white)),
-                                                            ],
+                                                      child: Row(
+                                                        children: [
+                                                          CircleAvatar(
+                                                            radius: 18,
+                                                            backgroundImage: NetworkImage('${cmt.user.image}'),
                                                           ),
-                                                        ),
-                                                      ],
-                                                    ),
+                                                          const SizedBox(width: 12),
+                                                          checkUrl(cmt.content)
+                                                              ? Expanded(
+                                                            child: Row(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                // Tên người dùng
+                                                                Text(
+                                                                  cmt.user.fullName ?? cmt.user.username,
+                                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                                ),
+                                                                const SizedBox(width: 10), // Tạo khoảng cách giữa tên người dùng và ảnh
+                                                                // Hình ảnh trong comment
+                                                                ClipRRect(
+                                                                  borderRadius: BorderRadius.circular(8),
+                                                                  child: Image.network(
+                                                                    cmt.content,
+                                                                    height: 120,
+                                                                    fit: BoxFit.contain,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          )
+                                                              : Expanded(
+                                                            child: Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                // Tên người dùng
+                                                                Text(
+                                                                  cmt.user.fullName ?? cmt.user.username,
+                                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                                ),
+                                                                const SizedBox(height: 2),
+                                                                // Nội dung bình luận
+                                                                Text(
+                                                                  cmt.content,
+                                                                  style: const TextStyle(color: Colors.white),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+
                                                   );
                                                 }
                                                 return Container();
@@ -521,11 +568,8 @@ class HomePage extends StatelessWidget {
                                                       content: homeProvider.commentController[index].text.trim(),
                                                       post: post,
                                                     );
-                                                    homeProvider.apiService.createCmts(comment).then((onValue) {
-                                                      homeProvider.clearCmts(index);
-                                                    }).catchError((onError) {
-                                                      print('Có lỗi khi gửi bình luận: $onError');
-                                                    });
+                                                    homeProvider.sendComment(comment);
+                                                    homeProvider.clearCmts(index);
                                                   },
                                                   icon: const Icon(
                                                     FontAwesomeIcons.paperPlane,
@@ -575,11 +619,8 @@ class HomePage extends StatelessWidget {
                                                     content: homeProvider.commentController[index].text.trim(),
                                                     post: post,
                                                   );
-                                                  homeProvider.apiService.createCmts(comment).then((onValue) {
-                                                    homeProvider.clearCmts(index);
-                                                  }).catchError((onError) {
-                                                    print('Có lỗi khi gửi bình luận: $onError');
-                                                  });
+                                                  homeProvider.sendComment(comment);
+                                                  homeProvider.clearCmts(index);
                                                 },
                                                 icon: const Icon(
                                                   FontAwesomeIcons.paperPlane,
@@ -634,6 +675,10 @@ class HomePage extends StatelessWidget {
         ],
       );
     });
+  }
+
+  bool checkUrl(String content) {
+    return CheckURL.isValidUrl(content);
   }
 
 }
