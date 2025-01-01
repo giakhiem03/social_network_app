@@ -435,23 +435,31 @@ class ApiService {
     }
   }
 
-  Future<void> sendMessage(Message message) async {
+  Future<List<Message>> sendMessage(Message message,File? image) async {
     try {
       var uri = Uri.parse('$baseUrl/sendMessage');
-      final response = await http.post(
-        uri,
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(message.toJson()),
-      );
-      print(response.statusCode);
-      if(response.statusCode == 200) {
-        print("Send Successful");
-      } else {
-        throw Exception('Failed to load notes');
+
+        var request = http.MultipartRequest('POST', uri);
+
+        request.fields['userSendMessage'] = '${message.userSendMessage.userId}';
+        request.fields['userReceiveMessage'] = '${message.userReceiveMessage.userId}';
+        request.fields['content'] = message.content;
+      if (image != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+            'image', image.path));
       }
-    }catch(e){
+      var response = await request.send();
+        if(response.statusCode == 200) {
+          // Convert the response body to a string and then parse it
+          String responseBody = await response.stream.bytesToString();
+          List jsonData = json.decode(responseBody);
+
+          // Return a list of messages parsed from the JSON data
+          return jsonData.map((message) => Message.fromJson(message)).toList();
+        } else {
+          throw Exception('Failed to load notes');
+        }
+    } catch(e){
       throw Exception('Failed to load users catch');
     }
   }

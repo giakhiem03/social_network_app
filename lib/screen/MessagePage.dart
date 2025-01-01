@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:social_network_project/models/CheckURL.dart';
 
 import '../ApiService/ApiService.dart';
 import '../models/EmojiUtil.dart';
@@ -33,7 +34,7 @@ class MessageProvider extends ChangeNotifier {
   }
 
   void sendMessage(User you, User yourFriend, String content) {
-    if (content.isNotEmpty) {
+    if (content.isNotEmpty && _image == null) {
       String emojifiedContent = emojify(content);
 
       Message message = Message(
@@ -42,8 +43,22 @@ class MessageProvider extends ChangeNotifier {
         content: emojifiedContent,
       );
 
-      apiService.sendMessage(message).then((onValue) {
-        futureMessage = apiService.getAllMessage();
+      apiService.sendMessage(message,null).then((messages) {
+        futureMessage =  Future.value(messages);
+        notifyListeners();
+      }).catchError((onError) {
+        print(onError);
+      });
+    } else if (_image != null){
+      Message message = Message(
+        userSendMessage: you,
+        userReceiveMessage: yourFriend,
+        content: "",
+      );
+
+      apiService.sendMessage(message,_image).then((messages) {
+        futureMessage = Future.value(messages);
+        _image = null;
         notifyListeners();
       }).catchError((onError) {
         print(onError);
@@ -121,6 +136,10 @@ class MessagePage extends StatelessWidget {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  bool checkUrl(String content) {
+    return CheckURL.isValidUrl(content);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -162,7 +181,7 @@ class MessagePage extends StatelessWidget {
                       const Spacer(),
                       IconButton(
                         onPressed: () {},
-                        icon: const Icon(Icons.phone),
+                        icon: const Icon(Icons.phone,color: Colors.green,),
                       ),
                     ],
                   ),
@@ -181,11 +200,12 @@ class MessagePage extends StatelessWidget {
                     } else if (snapshot.hasData) {
                       List<Message> messages = snapshot.data!;
                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                        _scrollController.animateTo(
-                          _scrollController.position.maxScrollExtent,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOut,
-                        );
+                        // _scrollController.animateTo(
+                        //   _scrollController.position.maxScrollExtent * 1.35,
+                        //   duration: const Duration(milliseconds: 300),
+                        //   curve: Curves.easeOut,
+                        // );
+                        _scrollController.jumpTo(_scrollController.position.maxScrollExtent * 1.35);
                       });
 
                       return Expanded(
@@ -205,7 +225,9 @@ class MessagePage extends StatelessWidget {
                                 crossAxisAlignment: isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                                 children: [
                                   if (isMyMessage)
-                                    Container(
+                                    checkUrl(message.content) ?
+                                    Image.network(message.content,height: 100,fit: BoxFit.contain,)
+                                    : Container(
                                       padding: const EdgeInsets.all(6),
                                       decoration: BoxDecoration(
                                         color: Colors.orangeAccent,
@@ -236,6 +258,9 @@ class MessagePage extends StatelessWidget {
                                           ),
                                         ),
                                         const SizedBox(width: 8),
+                                        checkUrl(message.content) ?
+                                        Image.network(message.content,height: 100,fit: BoxFit.contain,)
+                                            :
                                         Container(
                                           padding: const EdgeInsets.all(6),
                                           decoration: BoxDecoration(

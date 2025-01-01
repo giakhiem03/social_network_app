@@ -6,6 +6,7 @@ class EmojiUtil {
     }
     return emojiName;
   }
+
   // Danh sách tên emoji hợp lệ
   static const List<String> validEmojiNames = [
     'smile', 'thumbs_up', 'heart', 'laughing', 'd', 'wink', 'cry', 'angry',

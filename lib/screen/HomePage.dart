@@ -27,6 +27,8 @@ class HomeProvider extends ChangeNotifier {
 // Map to track the toggle state for each post
   Map<int, bool> postCommentToggle = {};
 
+  List<ScrollController> scrollControllers = [];
+
 
   File? _image;
 
@@ -34,12 +36,12 @@ class HomeProvider extends ChangeNotifier {
 
   HomeProvider() {
     initialize();
-
   }
 
   void toggleComment(int postId) {
     // Toggle only the specific post's comment visibility
     postCommentToggle[postId] = !(postCommentToggle[postId] ?? false);
+
     notifyListeners();
   }
 
@@ -51,17 +53,24 @@ class HomeProvider extends ChangeNotifier {
 
 
   void initialize() {
-    futurePosts = apiService.getAllPosts();
-    futureCmts = apiService.getAllCmts();
+    try {
+      futurePosts =  Future.value(apiService.getAllPosts());
+      futureCmts =  Future.value(apiService.getAllCmts());
+      futurePosts.then((posts) {
+        commentController = List.generate(posts.length, (index) => TextEditingController());
+        // Initialize the toggle state for each post to false (comments hidden)
+        scrollControllers = List.generate(posts.length, (index) => ScrollController());
 
-    futurePosts.then((posts) {
-      commentController = List.generate(posts.length, (index) => TextEditingController());
-      // Initialize the toggle state for each post to false (comments hidden)
-      for (var post in posts) {
-        postCommentToggle[post.postId!] = false;
-      }
-    }).catchError((error) => print("Error: $error"));
-    notifyListeners();
+        for (var post in posts) {
+          scrollControllers[post.postId!] =  ScrollController();
+          postCommentToggle[post.postId!] = false;
+        }
+      }).catchError((error) => print("Error: $error"));
+      notifyListeners();
+    }catch(e) {
+      print(e);
+    }
+
   }
 
   void toggleLike(int postId, int userId) {
@@ -175,7 +184,6 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners(); // Cập nhật lại UI
   }
 
-
 }
 
 
@@ -189,7 +197,6 @@ class HomePage extends StatelessWidget {
 
     final userProvider = Provider.of<UserProvider>(context); // Lấy dữ liệu người dùng từ Provider
     final user = userProvider.user;
-
     return Consumer<HomeProvider>(builder: (context, homeProvider, child) {
       return Column(
         children: [
@@ -235,7 +242,7 @@ class HomePage extends StatelessWidget {
                     child: CircularProgressIndicator()); // Hiển thị khi đang tải
               } else if (snapshot.hasError) {
                 return Center(child: Text('Có lỗi xảy ra: ${snapshot.error}'));
-              } else if (snapshot.hasData) {
+              } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 List<Post> posts = snapshot.data!;
                 // Nếu có dữ liệu, hiển thị danh sách bài post
                 return Expanded(
@@ -344,6 +351,7 @@ class HomePage extends StatelessWidget {
                                 IconButton(
                                   onPressed: () {
                                     homeProvider.toggleComment(post.postId!);
+
                                   },
                                   icon: const Icon(
                                     FontAwesomeIcons.comment,
@@ -382,216 +390,210 @@ class HomePage extends StatelessWidget {
                             ),
                             const SizedBox(height: 20),
                             homeProvider.postCommentToggle[post.postId!] == true
-                                ? Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                FutureBuilder<List<Comments>>(
-                                  future: homeProvider.futureCmts,
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (snapshot.hasError) {
-                                      return Center(
-                                          child: Text(
-                                              'Có lỗi xảy ra: ${snapshot
-                                                  .error}'));
-                                    } else if (snapshot.hasData) {
-                                      List<Comments> comments =
-                                      snapshot.data!;
-                                      return ListView.builder(
-                                        itemCount: comments.length,
-                                        shrinkWrap: true,
-                                        itemBuilder: (context, index) {
-                                          Comments cmt = comments[index];
-                                          if (cmt.post.postId ==
-                                              post.postId) {
-                                            return Container(
-                                              margin: const EdgeInsets.only(
-                                                  top: 6, bottom: 6),
-                                              padding: const EdgeInsets.all(
-                                                  10),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white12,
-                                                borderRadius:
-                                                BorderRadius.circular(
-                                                    10),
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  const CircleAvatar(
-                                                    radius: 18,
-                                                    backgroundImage:
-                                                    AssetImage(
-                                                        'assets/images/image.jpg'),
-                                                  ),
-                                                  const SizedBox(width: 12),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                      CrossAxisAlignment
-                                                          .start,
+                                ? Container(
+                              constraints: const BoxConstraints(
+                                maxHeight: 300
+                              ),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    FutureBuilder(
+                                      future: homeProvider.futureCmts,
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return const Center(child: CircularProgressIndicator());
+                                        } else if (snapshot.hasError) {
+                                          return Center(child: Text('Có lỗi xảy ra: ${snapshot.error}'));
+                                        } else if (snapshot.hasData) {
+                                          List<Comments> comments = snapshot.data!;
+
+                                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                                            homeProvider.scrollControllers[post.postId!].
+                                            jumpTo(homeProvider.scrollControllers[post.postId!].
+                                            position.maxScrollExtent * 1.5);
+                                          });
+                                          return Container(
+                                            constraints: const BoxConstraints(
+                                              maxHeight: 220
+                                            ),
+                                            child: ListView.builder(
+                                              controller: homeProvider.scrollControllers[post.postId!],
+                                              itemCount: comments.length,
+                                              shrinkWrap: true,
+                                              physics: const AlwaysScrollableScrollPhysics(),
+                                              itemBuilder: (context, index) {
+                                                Comments cmt = comments[index];
+                                                if (cmt.post.postId == post.postId) {
+                                                  return Container(
+                                                    margin: const EdgeInsets.only(top: 6, bottom: 6),
+                                                    padding: const EdgeInsets.all(10),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white12,
+                                                      borderRadius: BorderRadius.circular(10),
+                                                    ),
+                                                    child: Row(
                                                       children: [
-                                                        Text(
-                                                            cmt.user
-                                                                .fullName ??
-                                                                cmt.user
-                                                                    .username,
-                                                            style: const TextStyle(
-                                                                color: Colors
-                                                                    .white)),
-                                                        const SizedBox(
-                                                            height: 2),
-                                                        Text(
-                                                            cmt.content!,
-                                                            style: const TextStyle(
-                                                                color: Colors
-                                                                    .white)),
+                                                        CircleAvatar(
+                                                          radius: 18,
+                                                          backgroundImage: NetworkImage('${cmt.user.image}'),
+                                                        ),
+                                                        const SizedBox(width: 12),
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(cmt.user.fullName ?? cmt.user.username,
+                                                                  style: const TextStyle(color: Colors.white)),
+                                                              const SizedBox(height: 2),
+                                                              Text(cmt.content,
+                                                                  style: const TextStyle(color: Colors.white)),
+                                                            ],
+                                                          ),
+                                                        ),
                                                       ],
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }
-                                          return Container();
-                                        },
-                                      );
-                                    } else {
-                                      return const Text(
-                                        "Không có bình luận nào.",
-                                        style: TextStyle(color: Colors.white54),
-                                      );
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 12),
-                                homeProvider.image != null // Kiểm tra nếu có ảnh đã chọn
-                                    ? Container(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[800], // Màu nền của ảnh
-                                    borderRadius: BorderRadius.circular(12), // Bo góc cho khung ảnh
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.3),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        height: 100,
-                                        width: 100,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(8),
-                                          image: DecorationImage(
-                                            image: FileImage(homeProvider.image!),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10), // Khoảng cách giữa ảnh và nút
-                                      Expanded(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                          children: [
-                                            // Nút xóa ảnh
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.close,
-                                                color: Colors.red,
-                                                size: 30,
-                                              ),
-                                              onPressed: () {
-                                                homeProvider.clearImage(); // Xóa ảnh khi nhấn vào nút
+                                                  );
+                                                }
+                                                return Container();
                                               },
                                             ),
-                                            // Nút gửi bình luận
-                                            IconButton(
-                                              onPressed: () {
-                                                Comments comment = Comments(
-                                                  user: user!,
-                                                  content: homeProvider.commentController[index].text.trim(),
-                                                  post: post,
-                                                );
-                                                homeProvider.apiService.createCmts(comment).then((onValue) {
-                                                  homeProvider.clearCmts(index);
-                                                }).catchError((onError) {
-                                                  print('Có lỗi khi gửi bình luận: $onError');
-                                                });
-                                              },
-                                              icon: const Icon(
-                                                FontAwesomeIcons.paperPlane,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                                    : TextField(
-                                  controller: homeProvider.commentController[index],
-                                  onChanged: (text) {
-                                    // Áp dụng emojify mỗi khi người dùng nhập
-                                    homeProvider.commentController[index].value = homeProvider.commentController[index].value.copyWith(
-                                      text: homeProvider.emojify(text),  // Chuyển đổi tên emoji thành emoji khi nhập
-                                      selection: TextSelection.collapsed(offset: text.length),
-                                    );
-                                  },
-                                  style: const TextStyle(color: Colors.white),
-                                  decoration: InputDecoration(
-                                    hintText: "Viết bình luận...",
-                                    hintStyle: const TextStyle(color: Colors.white54),
-                                    suffixIcon: Row(
-                                      mainAxisSize: MainAxisSize.min, // Đảm bảo row chiếm không gian tối thiểu
-                                      children: [
-                                        // Emoji Button
-                                        IconButton(
-                                          onPressed: homeProvider.toggleEmojiPicker,
-                                          icon: const Icon(
-                                            Icons.insert_emoticon,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.camera_alt, color: Colors.white),
-                                          onPressed: () {
-                                            homeProvider._showImageOptions(context);
-                                          },
-                                        ),
-                                        // Send Button
-                                        IconButton(
-                                          onPressed: () {
-                                            Comments comment = Comments(
-                                              user: user!,
-                                              content: homeProvider.commentController[index].text.trim(),
-                                              post: post,
-                                            );
-                                            homeProvider.apiService.createCmts(comment).then((onValue) {
-                                              homeProvider.clearCmts(index);
-                                            }).catchError((onError) {
-                                              print('Có lỗi khi gửi bình luận: $onError');
-                                            });
-                                          },
-                                          icon: const Icon(
-                                            FontAwesomeIcons.paperPlane,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
+                                          )
+                                          ;
+                                        } else {
+                                          return const Text(
+                                            "Không có bình luận nào.",
+                                            style: TextStyle(color: Colors.white54),
+                                          );
+                                        }
+                                      },
                                     ),
-                                  ),
+                                    const SizedBox(height: 12),
+                                    homeProvider.image != null
+                                        ? Container(
+                                      margin: const EdgeInsets.only(bottom: 8),
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[800],
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.3),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            height: 100,
+                                            width: 100,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(8),
+                                              image: DecorationImage(
+                                                image: FileImage(homeProvider.image!),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(
+                                                    Icons.close,
+                                                    color: Colors.red,
+                                                    size: 30,
+                                                  ),
+                                                  onPressed: () {
+                                                    homeProvider.clearImage();
+                                                  },
+                                                ),
+                                                IconButton(
+                                                  onPressed: () {
+                                                    Comments comment = Comments(
+                                                      user: user!,
+                                                      content: homeProvider.commentController[index].text.trim(),
+                                                      post: post,
+                                                    );
+                                                    homeProvider.apiService.createCmts(comment).then((onValue) {
+                                                      homeProvider.clearCmts(index);
+                                                    }).catchError((onError) {
+                                                      print('Có lỗi khi gửi bình luận: $onError');
+                                                    });
+                                                  },
+                                                  icon: const Icon(
+                                                    FontAwesomeIcons.paperPlane,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                        : Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: TextField(
+                                        controller: homeProvider.commentController[index],
+                                        onChanged: (text) {
+                                          homeProvider.commentController[index].value = homeProvider.commentController[index].value.copyWith(
+                                            text: homeProvider.emojify(text),
+                                            selection: TextSelection.collapsed(offset: text.length),
+                                          );
+                                        },
+                                        style: const TextStyle(color: Colors.white),
+                                        decoration: InputDecoration(
+                                          hintText: "Viết bình luận...",
+                                          hintStyle: const TextStyle(color: Colors.white54),
+                                          suffixIcon: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                onPressed: homeProvider.toggleEmojiPicker,
+                                                icon: const Icon(
+                                                  Icons.insert_emoticon,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.camera_alt, color: Colors.white),
+                                                onPressed: () {
+                                                  homeProvider._showImageOptions(context);
+                                                },
+                                              ),
+                                              IconButton(
+                                                onPressed: () {
+                                                  Comments comment = Comments(
+                                                    user: user!,
+                                                    content: homeProvider.commentController[index].text.trim(),
+                                                    post: post,
+                                                  );
+                                                  homeProvider.apiService.createCmts(comment).then((onValue) {
+                                                    homeProvider.clearCmts(index);
+                                                  }).catchError((onError) {
+                                                    print('Có lỗi khi gửi bình luận: $onError');
+                                                  });
+                                                },
+                                                icon: const Icon(
+                                                  FontAwesomeIcons.paperPlane,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             )
                                 : Container(),
                             if (homeProvider.showEmojiPicker)
