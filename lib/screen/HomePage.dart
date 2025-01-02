@@ -11,6 +11,7 @@ import 'package:social_network_project/models/Post.dart';
 import '../models/CheckURL.dart';
 import '../models/DefaultAvatar.dart';
 import '../models/EmojiUtil.dart';
+import '../models/Friends.dart';
 import '../models/Theme.dart';
 import 'PostPage.dart';
 import 'ProfilePage.dart';
@@ -21,6 +22,8 @@ class HomeProvider extends ChangeNotifier {
   // bool toggleComments = false;
   bool valueCmt = false;
   ApiService apiService = ApiService();
+
+  late List<Friends> list_friend ;
 
   List<TextEditingController> commentController = []; // Initialize map
 // Map to track the toggle state for each post
@@ -40,7 +43,6 @@ class HomeProvider extends ChangeNotifier {
   void toggleComment(int postId) {
     // Toggle only the specific post's comment visibility
     postCommentToggle[postId] = !(postCommentToggle[postId] ?? false);
-
     notifyListeners();
   }
 
@@ -53,6 +55,10 @@ class HomeProvider extends ChangeNotifier {
 
   void initialize() {
     try {
+      apiService.getAllFriends().then((friends){
+        list_friend = friends;
+      });
+
       futurePosts =  Future.value(apiService.getAllPosts());
       futureCmts =  Future.value(apiService.getAllCmts());
       futurePosts.then((posts) {
@@ -200,12 +206,14 @@ class HomeProvider extends ChangeNotifier {
       });
     }
   }
+
+
 }
 
 class HomePage extends StatelessWidget {
 
+  const HomePage({super.key});
 
-  const HomePage({ super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -262,11 +270,24 @@ class HomePage extends StatelessWidget {
               } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 List<Post> posts = snapshot.data!;
                 // Nếu có dữ liệu, hiển thị danh sách bài post
+                List<int?> listFriendsID = [];
+                listFriendsID.add(user?.userId);
+
+                for (var f in homeProvider.list_friend) {
+                  if (f.userIdSend.userId == user?.userId && f.statusRelationship == 2) {
+                    listFriendsID.add(f.userIdReceive.userId);
+                  } else if (f.userIdReceive.userId == user?.userId && f.statusRelationship == 2) {
+                    listFriendsID.add(f.userIdSend.userId);
+                  }
+                }
+
+                List<Post> new_posts = posts.where((p) => listFriendsID.contains(p.userUpLoad.userId)).toList();
+
                 return Expanded(
                   child: ListView.builder(
-                    itemCount: posts.length,
+                    itemCount: new_posts.length,
                     itemBuilder: (context, index) {
-                      Post post = posts[index];
+                      Post post = new_posts[index];
 
                       return Container(
                         color: themeProvider.theme,

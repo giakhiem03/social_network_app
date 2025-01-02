@@ -44,6 +44,8 @@ dependencies:
   intl: ^0.20.1
   provider: ^6.1.2
   emoji_picker_flutter: ^4.2.0
+  shared_preferences: ^2.3.4
+  network_info_plus: ^6.1.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

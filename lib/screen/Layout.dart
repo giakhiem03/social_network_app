@@ -50,14 +50,14 @@ class _Layout extends State<Layout> {
       ProfilePage(),
       const SettingsPage(),
     ];
-    if (user!.status==false) {
-      Future.microtask(() {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
-      });
-    }
+    // if (user!.status==false) {
+    //   Future.microtask(() {
+    //     Navigator.pushReplacement(
+    //       context,
+    //       MaterialPageRoute(builder: (context) => const LoginPage()),
+    //     );
+    //   });
+    // }
     return SafeArea(
       child: Scaffold(
         key: _scaffoldKey,
@@ -85,7 +85,7 @@ class _Layout extends State<Layout> {
                   hintText: 'Search',
                   suffixIcon: IconButton(onPressed:()=>Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ListSearchPage(userSend: user,name: _searchInput.text)
+                      MaterialPageRoute(builder: (context) => ListSearchPage(userSend: user!,name: _searchInput.text)
                   )),
                       icon: const Icon(Icons.search)),
                   border: OutlineInputBorder(

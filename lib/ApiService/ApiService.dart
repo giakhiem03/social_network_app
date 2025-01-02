@@ -3,18 +3,19 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:social_network_project/DTO/LoginDTO.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:social_network_project/DTO/UpdateUserDTO.dart';
 import 'package:social_network_project/models/Comments.dart';
 import 'package:social_network_project/models/Friends.dart';
 import 'package:social_network_project/models/Message.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 
 import '../models/EmojiUtil.dart';
 import '../models/Post.dart';
 import '../models/User.dart';
 import '../models/Notifications.dart';
-
 class ApiService {
   final String baseUrl = '${getBaseUrl()}/api/users';
 
@@ -23,10 +24,13 @@ class ApiService {
       // Trường hợp chạy trên web
       return 'http://localhost:8080';
     } else if (Platform.isAndroid) {
-      // Trường hợp Android
-      return 'http://10.0.2.2:8080'; // Android Emulator
 
+      // Trường hợp Android
+      // return 'http://10.0.2.2:8080'; // Android Emulator
+
+      return 'http://192.168.1.10:8080';
     } else if (Platform.isIOS || Platform.isMacOS) {
+
       // Trường hợp iOS hoặc macOS (chạy Simulator)
       return 'http://127.0.0.1:8080';
     } else {
@@ -45,6 +49,7 @@ class ApiService {
         for (InternetAddress address in addresses) {
           // Kiểm tra nếu địa chỉ không phải là loopback và là địa chỉ IPv4
           if (!address.isLoopback && address.type == InternetAddressType.IPv4) {
+            print(address.address);
             return address.address;
           }
         }
@@ -76,9 +81,14 @@ class ApiService {
         },
         body: jsonEncode(user.toJson()),
       );
-
       if (response.statusCode == 200) {
         // If login is successful, parse the response body
+        // Lưu trạng thái đăng nhập vào SharedPreferences
+        final user = jsonDecode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('username', user['username']);
+        print( user['username']);
         return User.fromJson(jsonDecode(response.body));
       } else {
         // If login fails, show a Snackbar with an error message
@@ -98,6 +108,21 @@ class ApiService {
         duration: Duration(seconds: 2), // Snackbar duration
       ),
     );
+  }
+
+  Future<bool> verifyToken(String token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/verify-token'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return true; // Token hợp lệ
+    } else {
+      return false; // Token không hợp lệ
+    }
   }
 
   Future<List<User>> getAllUsers() async {
@@ -533,4 +558,58 @@ class ApiService {
       throw Exception('Failed to update users catch');
     }
   }
+
+  Future<User> getUserInfo(String token) async {
+    try {
+      var uri = Uri.parse('$baseUrl/getUserByToken/$token');
+      final response = await http.get(uri);
+      if(response.statusCode == 200) {
+        return User.fromJson(json.decode(response.body));
+      } else {
+        throw Exception('Failed to remove friend');
+      }
+    } catch(e){
+      throw Exception('Failed to remove friend catch');
+    }
+  }
+
+  Future<User> checkStatusFromServer(String username) async {
+    final uri = Uri.parse('$baseUrl/check-status-user');
+
+    try {
+      var request = http.MultipartRequest('POST', uri);
+
+      request.fields['username'] = username;
+
+      // Gửi request và nhận response
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var responseString = await response.stream.bytesToString();
+        return User.fromJson(json.decode(responseString));
+
+      } else {
+        throw Exception('Failed to check status');
+      }
+    } catch (e) {
+      print('Error checking status: $e');
+      throw Exception('Failed to check status');
+
+    }
+  }
+
+  Future<void> logout(String username) async {
+    final uri =Uri.parse('$baseUrl/logout');
+      var request = http.MultipartRequest('POST', uri);
+
+      request.fields['username'] = username;
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        var responseString = await response.stream.bytesToString();
+        print(responseString);
+      } else {
+        throw Exception("Đăng xuất thất bại");
+      }
+  }
+
 }

@@ -132,6 +132,6 @@ class User {
     "backgroundImage": backgroundImage,
     "role": role.roleId,
     "status": status,
-    "posts": posts.map((post) => post.postId).toList()
+    "posts": posts.map((post) => post.postId).toList(),
   };
 }

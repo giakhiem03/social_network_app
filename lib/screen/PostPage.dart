@@ -7,9 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
 import 'package:social_network_project/models/Post.dart';
-
 import '../models/Theme.dart';
 import '../models/User.dart';
+import 'HomePage.dart';
 import 'Layout.dart';
 
 class PostPage extends StatefulWidget {
@@ -43,7 +43,7 @@ class _PostPage extends State<PostPage> {
   // Tạo Post model để ánh xạ dữ liệu vào
 
   //Hàm upload bài post
-  void UploadPost() async {
+  void UploadPost(HomeProvider homeProvider) async {
     try {
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('HH:mm dd-MM-yyyy').format(now);
@@ -55,15 +55,18 @@ class _PostPage extends State<PostPage> {
 
       await apiService.uploadPost(post, _selectedImage);
 
+
       setState(() {
         _PostInput.clear();
         _selectedImage = null;
       });
 
+      homeProvider.initialize();
+
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Đăng bài thành công!")));
-      Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => Layout()));
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const Layout()));
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Đã xảy ra lỗi khi đăng bài!")));
@@ -76,6 +79,7 @@ class _PostPage extends State<PostPage> {
   Widget build(BuildContext context) {
 
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final homeProvider = Provider.of<HomeProvider>(context);
 
     return SafeArea(
         child: Scaffold(
@@ -104,7 +108,7 @@ class _PostPage extends State<PostPage> {
                         ? Colors.orangeAccent
                         : themeProvider.textColor,
                     onPressed: valueExist || _selectedImage != null
-                        ? UploadPost
+                        ? () => UploadPost(homeProvider)
                         : null,
                   )
                 ],

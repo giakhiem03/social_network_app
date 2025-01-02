@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:social_network_project/screen/HomePage.dart';
 import 'dart:io';
 
 import '../ApiService/ApiService.dart';
@@ -38,10 +40,16 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void logout() {
+  ApiService apiService = ApiService();
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username');
+    await prefs.remove('username');
     _user = null;
     _profileImage = null;
     _backgroundImage = null;
+    apiService.logout(username!);
     _resetUserData();
     notifyListeners();
   }

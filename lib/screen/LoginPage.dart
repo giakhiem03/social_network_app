@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
 import '../models/User.dart';
 import 'Layout.dart';
@@ -11,10 +12,11 @@ class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  _LoginPage createState() => _LoginPage();
+  State<LoginPage> createState() => _LoginPage();
 }
 
 class _LoginPage extends State<LoginPage> {
+
   ApiService apiService = ApiService();
 
   final TextEditingController usernameController = TextEditingController();
@@ -28,13 +30,41 @@ class _LoginPage extends State<LoginPage> {
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _checkToken();
+  }
+
+  Future<void> _checkToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      final username = prefs.getString('username');
+      if (username != null) {
+        User user = await apiService.checkStatusFromServer(username);
+        if (user.status) {
+          Provider.of<UserProvider>(context, listen: false).setUser(user);
+          // Nếu trạng thái là true, chuyển hướng đến Layout
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Layout()),
+          );
+        }
+      }
+    }catch(e) {
+      print(e);
+    }
+
+
+  }
+
   void submitForm() {
     if (formKey.currentState!.validate()) {
       apiService
           .login(context,usernameController.text, passwordController.text)
-          .then((_user) {
+          .then((_user) async {
         Provider.of<UserProvider>(context, listen: false).setUser(_user);
-        Navigator.push(
+        Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const Layout()));
       }).catchError((error) {
@@ -75,6 +105,7 @@ class _LoginPage extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return SafeArea(
       child: Scaffold(
 // backgroundColor: Colors.blue[50],
