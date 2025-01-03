@@ -146,16 +146,43 @@ class _PostPage extends State<PostPage> {
               ),
             ),
             // Hiển thị ảnh nếu có chọn
+            // Hiển thị ảnh nếu có chọn, kèm theo nút X để xóa ảnh
             _selectedImage != null
-                ? SizedBox(
-                    height: 380, // Độ cao cố định
-                    width: double.infinity, // Độ rộng toàn màn hình
-                    child: Image.file(
-                      _selectedImage!,
-                      fit: BoxFit.contain, // Lấp đầy khung với tỷ lệ ảnh gốc
+                ? Stack(
+              children: [
+                SizedBox(
+                  height: 380, // Độ cao cố định
+                  width: double.infinity, // Độ rộng toàn màn hình
+                  child: Image.file(
+                    _selectedImage!,
+                    fit: BoxFit.contain, // Lấp đầy khung với tỷ lệ ảnh gốc
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  right: 36,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedImage = null;
+                      });
+                    },
+                    child: Container(
+                      decoration:const BoxDecoration(
+                        color: Colors.red,
+                      ),
+                      child: const Icon(
+                        size: 30,
+                        Icons.close,
+                        color: Colors.white,
+                      ),
                     ),
-                  )
+                  ),
+                ),
+              ],
+            )
                 : Container(),
+
             // Các nút chọn ảnh
             const SizedBox(height: 16),
             Row(
