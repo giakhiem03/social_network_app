@@ -4,7 +4,6 @@ import 'package:social_network_project/ApiService/ApiService.dart';
 import 'package:social_network_project/models/Notifications.dart';
 
 import '../models/Theme.dart';
-import '../models/User.dart';
 import 'ProfilePage.dart';
 
 class NotificationPage extends StatefulWidget {

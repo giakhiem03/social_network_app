@@ -23,7 +23,7 @@ class ThemeProvider extends ChangeNotifier {
 
   bool get isDarkMode => _isDarkMode;
 
-  Color _textProfile= Colors.black87;
+  Color _textProfile= Colors.white70;
 
   Color get textProfile => _textProfile;
 
