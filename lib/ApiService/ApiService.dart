@@ -460,12 +460,13 @@ class ApiService {
     }
   }
 
-  Future<void> acceptFriend(int friendId) async{
+  Future<List<Friends>> acceptFriend(int friendId) async{
     try {
       var uri = Uri.parse('$baseUrl/acceptFriend/$friendId');
       final response = await http.put(uri);
       if(response.statusCode == 200) {
-        print("accept successful");
+        List jsonData = json.decode(response.body);
+        return jsonData.map((f)=> Friends.fromJson(f)).toList();
       } else {
         throw Exception('Failed to remove friend');
       }

@@ -116,9 +116,9 @@ class _PostPage extends State<PostPage> {
             ),
           ],
         ),
-        backgroundColor: themeProvider.textFeel,
+        backgroundColor: themeProvider.theme,
       ),
-      backgroundColor: Colors.black,
+      backgroundColor: themeProvider.theme,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -136,7 +136,7 @@ class _PostPage extends State<PostPage> {
                     ),
                     hintText: 'Chia sẻ cảm xúc của bạn!',
                   ),
-                  style: GoogleFonts.dynaPuff(color: themeProvider.textFeel),
+                  style: GoogleFonts.dynaPuff(color: themeProvider.textPost),
                   onChanged: (value) {
                     setState(() {
                       valueExist = _PostInput.text.trim().isNotEmpty;

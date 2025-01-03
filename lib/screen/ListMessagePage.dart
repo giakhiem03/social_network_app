@@ -142,7 +142,7 @@ class _ListMessagePage extends State<ListMessagePage> {
                                 const SizedBox(width: 16), // Space between avatar and text
                                 Expanded( // Use Expanded to make text take remaining space
                                   child: Text(
-                                    '${friend.userIdReceive.fullName}', // Display friend's full name
+                                    '${friend.userIdSend.fullName}', // Display friend's full name
                                     style: TextStyle(
                                       color: themeProvider.textFullName, // Light text color for contrast
                                       fontSize: 16, // Adjust font size for better readability

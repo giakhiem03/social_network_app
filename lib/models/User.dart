@@ -80,8 +80,8 @@ class User {
   String? phoneNumber;
   final Role role;
   late bool status;
-  final String? image;
-  final String? backgroundImage;
+  String? image;
+  String? backgroundImage;
   final Set<Post> posts;
 
   User({

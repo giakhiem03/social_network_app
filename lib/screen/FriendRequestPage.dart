@@ -26,11 +26,27 @@ class _FriendRequestPage extends State<FriendRequestPage> {
   }
 
 
-  void acceptFriends(int friendId) {
-    setState(() {
-      apiService.acceptFriend(friendId);
-    });
+  void acceptFriends(int friendId,BuildContext context) {
+
+      apiService.acceptFriend(friendId).then((onValue){
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Center(
+              child: Text(
+                'Đồng ý kết bạn thành công', // Nội dung lỗi từ server
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3), // Thời gian hiển thị
+          ),
+        );
+        setState(() {
+          futureFriends = Future.value(onValue);
+        });
+      });
   }
+
 
   @override
   void initState() {
@@ -52,7 +68,7 @@ class _FriendRequestPage extends State<FriendRequestPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 60),
+              const SizedBox(height: 60),
               Text(
                 'Lời mời kết bạn',
                 style: TextStyle(color: themeProvider.textColor, fontSize: 26),
@@ -93,7 +109,7 @@ class _FriendRequestPage extends State<FriendRequestPage> {
                             Text( '${friend.userIdSend.fullName} đã gửi cho bạn lời mời kết bạn',
                               style:  TextStyle(color: themeProvider.textColor),
                             ),
-                            IconButton(onPressed: ()=>acceptFriends(friend.id!), icon:const Icon(Icons.check, color: Colors.green,))
+                            IconButton(onPressed: ()=>acceptFriends(friend.id!,context), icon:const Icon(Icons.check, color: Colors.green,))
                           ],
                         ) ,
                       ): const Center();

@@ -27,6 +27,10 @@ class ThemeProvider extends ChangeNotifier {
 
   Color get textProfile => _textProfile;
 
+  Color _textPost = Colors.white70;
+
+  Color get textPost => _textPost;
+
   changeTheme(bool mode) {
     _isDarkMode = mode;
 
@@ -36,12 +40,14 @@ class ThemeProvider extends ChangeNotifier {
       _textFeel = Colors.white38;
       _textFullName = Colors.black87;
       _textProfile = Colors.white70;
+      _textPost = Colors.white70;
     } else {
       _theme =  Colors.white;
       _text =  Colors.black;
       _textFeel = Colors.black87;
       _textFullName = Colors.white70;
       _textProfile = Colors.white;
+      _textPost = Colors.black87;
     }
     notifyListeners();
   }

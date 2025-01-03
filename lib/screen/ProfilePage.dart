@@ -80,6 +80,7 @@ class UserProvider extends ChangeNotifier {
     ApiService apiService = ApiService();
     try {
       User updatedUser = await apiService.updateUser(userDTO, _profileImage, _backgroundImage);
+
       _user = updatedUser;
       _resetUserData();
       notifyListeners();
@@ -287,14 +288,27 @@ class _ProfilePage extends State<ProfilePage> {
 
   void _onUpdatePressed(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    print(userProvider.fullNameController.text);
+
     UpdateUserDTO userDTO = UpdateUserDTO(
       userId: userProvider.user!.userId!,
       fullName: userProvider.fullNameController.text,
       email: userProvider.emailController.text,
       phoneNumber: userProvider.phoneController.text,
     );
-    userProvider.updateUserInfo(userDTO);
+    userProvider.updateUserInfo(userDTO).then((onValue){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(
+            child: Text(
+              'Update Profile thành công', // Nội dung lỗi từ server
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3), // Thời gian hiển thị
+        ),
+      );
+    });
   }
 
   void _showProfileImageOptions(BuildContext context) {

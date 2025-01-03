@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../ApiService/ApiService.dart';
+import '../models/DefaultAvatar.dart';
 import 'LoginPage.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -31,31 +32,92 @@ class _RegisterPage extends State<RegisterPage> {
   ApiService apiService = ApiService();
 
   void submitForm() {
-    if (formKey.currentState!.validate()) {
-      User user = User(username: usernameController.text,
-          password: passwordController.text,email: emailController.text,
-          status: false,role: Role(roleId: 2));
-      apiService.createUser(user)
-          .then((new_user) {
-            print(new_user);
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const LoginPage()));
-      }).catchError((error) {
-        print('Error: $error');
-        // Hiển thị SnackBar thông báo lỗi
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Tài khoản đã có người sử dụng', // Nội dung lỗi từ server
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3), // Thời gian hiển thị
+    String email = emailController.text;
+    String password = passwordController.text;
+    String username = usernameController.text;
+
+    if (!isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Email không đúng định dạng', // Thông báo email không đúng định dạng
+            style: TextStyle(color: Colors.white),
           ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3), // Thời gian hiển thị
+        ),
+      );
+    } else if (!isValidPassword(password)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Mật khẩu phải có hơn 6 kí tự', // Thông báo mật khẩu không hợp lệ
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3), // Thời gian hiển thị
+        ),
+      );
+    } else if (!isValidUsername(username)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Tài khoản không được chứa ký tự đặc biệt', // Thông báo tài khoản không hợp lệ
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3), // Thời gian hiển thị
+        ),
+      );
+    } else {
+      if (formKey.currentState!.validate()) {
+        User user = User(
+            username: usernameController.text,
+            password: passwordController.text,
+            email: emailController.text,
+            status: false,
+            role: Role(roleId: 2)
         );
-      });
+        user.image = Images.defaultImage;
+        user.backgroundImage = Images.defaultBackground;
+        apiService.createUser(user).then((new_user) {
+          print(new_user);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+        }).catchError((error) {
+          print('Error: $error');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Tài khoản đã có người sử dụng', // Nội dung lỗi từ server
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3), // Thời gian hiển thị
+            ),
+          );
+        });
+      }
     }
   }
+
+  bool isValidEmail(String email) {
+    String pattern =
+        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+    RegExp regex = RegExp(pattern);
+    return regex.hasMatch(email);
+  }
+
+  bool isValidPassword(String password) {
+    return password.length > 6;
+  }
+
+  bool isValidUsername(String username) {
+    String pattern = r'^[a-zA-Z0-9]+$';
+    RegExp regex = RegExp(pattern);
+    return regex.hasMatch(username);
+  }
+
+
 
   @override
   Widget build(BuildContext context) {

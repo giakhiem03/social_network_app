@@ -19,7 +19,7 @@ class SearchProvider extends ChangeNotifier {
     return apiService.getAllFriends();
   }
 
-  void addFriends(User userIdSend, User userIdReceive, int status) {
+  void addFriends(User userIdSend, User userIdReceive, int status, BuildContext context) {
     Friends friend = Friends(
       userIdSend: userIdSend,
       userIdReceive: userIdReceive,
@@ -36,6 +36,18 @@ class SearchProvider extends ChangeNotifier {
             break;
           }
         }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Center(
+              child: Text(
+                'Thêm bạn thành công', // Nội dung lỗi từ server
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3), // Thời gian hiển thị
+          ),
+        );
         notifyListeners(); // Chỉ cập nhật trạng thái giao diện
       });
     }).catchError((onError){
@@ -43,16 +55,40 @@ class SearchProvider extends ChangeNotifier {
     });
   }
 
-  void cancelAddFriends(int friendId) {
+  void cancelAddFriends(int friendId,BuildContext context) {
     apiService.removeFriend(friendId).then((onValue){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(
+            child: Text(
+              'Hủy bạn thành công', // Nội dung lỗi từ server
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3), // Thời gian hiển thị
+        ),
+      );
       notifyListeners();
     }).catchError((onError){
       print(onError);
     }); // Thông báo cập nhật
   }
 
-  void acceptFriends(int friendId) {
+  void acceptFriends(int friendId,BuildContext context) {
     apiService.acceptFriend(friendId).then((onValue){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(
+            child: Text(
+              'Đồng ý kết bạn thành công', // Nội dung lỗi từ server
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3), // Thời gian hiển thị
+        ),
+      );
       notifyListeners(); // Thông báo cập nhật
     }).catchError((onError){
       print(onError);
@@ -171,7 +207,8 @@ class ListSearchPage extends StatelessWidget {
                                     onPressed: () {
                                       if (icon.icon == Icons.add) {
                                         searchProvider.addFriends(
-                                            userSend, user, 1);
+                                            userSend, user, 1,context);
+
                                       } else if (icon.icon == Icons.cancel ||
                                           icon.icon == FontAwesomeIcons.userGroup) {
                                         Friends friend = friends.firstWhere(
@@ -185,7 +222,7 @@ class ListSearchPage extends StatelessWidget {
                                                   f.userIdReceive.userId ==
                                                       userSend.userId),
                                         );
-                                        searchProvider.cancelAddFriends(friend.id!);
+                                        searchProvider.cancelAddFriends(friend.id!,context);
                                       } else if(icon.icon == Icons.check) {
                                         Friends friend = friends.firstWhere(
                                               (f) =>
@@ -198,7 +235,7 @@ class ListSearchPage extends StatelessWidget {
                                                   f.userIdReceive.userId ==
                                                       userSend.userId)
                                         );
-                                        searchProvider.acceptFriends(friend.id!);
+                                        searchProvider.acceptFriends(friend.id!,context);
                                       }
                                     },
                                     icon: icon,

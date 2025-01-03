@@ -3,7 +3,7 @@ import 'package:social_network_project/models/User.dart';
 class Post {
   final int? postId;
   final User userUpLoad;
-  late final String? postImage;
+  String? postImage;
   final String? caption;
   int? reactionQuantity;
   final String postedTime;

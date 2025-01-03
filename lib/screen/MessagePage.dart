@@ -24,6 +24,7 @@ class MessageProvider extends ChangeNotifier {
   MessageProvider() {
     initialize();
   }
+
   bool get showEmojiPicker => _showEmojiPicker;
   void initialize() {
     futureMessage = apiService.getAllMessage();
