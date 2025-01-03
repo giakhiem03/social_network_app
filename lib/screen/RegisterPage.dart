@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:social_network_project/models/Role.dart';
 import 'package:social_network_project/models/User.dart';
 import 'dart:convert';
@@ -139,20 +138,20 @@ class _RegisterPage extends State<RegisterPage> {
             child: Center(
               child: Column(
                 children: [
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 78,
                       ),
                       Text(
                         'Welcome to',
-                        style: GoogleFonts.chewy(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(right: 10.0, top: 10.0),
                         child: CircleAvatar(
                           radius: 36,
@@ -162,9 +161,9 @@ class _RegisterPage extends State<RegisterPage> {
                       ),
                     ],
                   ),
-                  Text(
+                  const Text(
                     'Go Ku',
-                    style: GoogleFonts.chewy(
+                    style: TextStyle(
                         fontSize: 46, color: Colors.deepOrangeAccent),
                   ),
                   Image.asset(
@@ -181,8 +180,8 @@ class _RegisterPage extends State<RegisterPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Đăng Ký',
-                                  style: GoogleFonts.dynaPuff(
+                              const Text('Đăng Ký',
+                                  style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 30,
                                       color: Colors.white)),
@@ -224,12 +223,12 @@ class _RegisterPage extends State<RegisterPage> {
                                         borderRadius: BorderRadius.circular(
                                             50), // Giữ góc bo tròn
                                       ),
-                                      errorStyle: GoogleFonts.dynaPuff(
+                                      errorStyle: const TextStyle(
                                         color: Colors.white,
                                       ),
                                       fillColor: Colors.deepOrangeAccent[100],
                                       filled: true,
-                                      labelStyle: GoogleFonts.dynaPuff(
+                                      labelStyle: const TextStyle(
                                           color: Colors.white, fontSize: 14),
                                       prefixIcon: const Icon(
                                         Icons.person,
@@ -268,10 +267,10 @@ class _RegisterPage extends State<RegisterPage> {
                                         ),
                                         fillColor: Colors.deepOrangeAccent[100],
                                         filled: true,
-                                        errorStyle: GoogleFonts.dynaPuff(
+                                        errorStyle: const TextStyle(
                                           color: Colors.white,
                                         ),
-                                        labelStyle: GoogleFonts.dynaPuff(
+                                        labelStyle: const TextStyle(
                                             color: Colors.white, fontSize: 14),
                                         prefixIcon: const Icon(Icons.lock,
                                             color: Colors.white),
@@ -317,10 +316,10 @@ class _RegisterPage extends State<RegisterPage> {
                                       ),
                                       fillColor: Colors.deepOrangeAccent[100],
                                       filled: true,
-                                      errorStyle: GoogleFonts.dynaPuff(
+                                      errorStyle: const TextStyle(
                                         color: Colors.white,
                                       ),
-                                      labelStyle: GoogleFonts.dynaPuff(
+                                      labelStyle:const TextStyle(
                                           color: Colors.white, fontSize: 14),
                                       prefixIcon: const Icon(Icons.email,
                                           color: Colors.white),
@@ -334,15 +333,15 @@ class _RegisterPage extends State<RegisterPage> {
                                   ),
                                   ElevatedButton(
                                       onPressed: submitForm,
-                                      child: Text('Đăng ký',
-                                          style: GoogleFonts.chewy(
+                                      child: const Text('Đăng ký',
+                                          style: TextStyle(
                                               color: Colors.deepOrangeAccent,
                                               fontSize: 16))),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text('Bạn đã có tài khoản?',
-                                          style: GoogleFonts.dynaPuff(
+                                      const Text('Bạn đã có tài khoản?',
+                                          style: TextStyle(
                                               fontSize: 12,
                                               color: Colors.white)),
                                       TextButton(
@@ -358,9 +357,9 @@ class _RegisterPage extends State<RegisterPage> {
                                                       const LoginPage()),
                                             );
                                           },
-                                          child: Text(
+                                          child: const Text(
                                             'đăng nhập',
-                                            style: GoogleFonts.dynaPuff(
+                                            style: TextStyle(
                                               fontSize: 12,
                                               color: Colors.white,
                                               decoration:

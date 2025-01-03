@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:social_network_project/ApiService/ApiService.dart';
@@ -79,14 +81,14 @@ class _NotificationPage extends State<NotificationPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    notification.userIdSend.fullName!, // Hiển thị tên người dùng
+                                    utf8.decode(notification.userIdSend.fullName!.runes.toList()), // Hiển thị tên người dùng
                                     style: TextStyle(color: themeProvider.textColor),
                                   ),
                                   notification.notificationCategory.id == 1 ?
-                                  Text( '${notification.userIdSend.fullName} đã like bài viết của bạn',
+                                  Text( '${utf8.decode(notification.userIdSend.fullName!.runes.toList())} đã like bài viết của bạn',
                                     style: TextStyle(color: themeProvider.textColor),
                                   ) :
-                                  Text( '${notification.userIdSend.fullName} đã bình luận bài viết của bạn',style: TextStyle(color: themeProvider.textColor),),
+                                  Text( '${utf8.decode(notification.userIdSend.fullName!.runes.toList())} đã bình luận bài viết của bạn',style: TextStyle(color: themeProvider.textColor),),
                                 ],
                               ),
                             ],

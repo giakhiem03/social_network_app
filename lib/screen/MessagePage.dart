@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -175,7 +176,7 @@ class MessagePage extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${yourFriend.fullName}',
+                        utf8.decode(yourFriend.fullName!.runes.toList()),
                         style: TextStyle(
                           color: themeProvider.textColor,
                           fontSize: 14,
@@ -238,7 +239,7 @@ class MessagePage extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
-                                        message.content,
+                                        utf8.decode(message.content.runes.toList()),
                                         style: TextStyle(
                                           color: themeProvider.textColor,
                                           fontSize: 18,
@@ -272,7 +273,7 @@ class MessagePage extends StatelessWidget {
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                           child: Text(
-                                            message.content,
+                                            utf8.decode(message.content.runes.toList()),
                                             style: const TextStyle(
                                               color: Colors.black,
                                               fontSize: 18,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -97,7 +99,8 @@ class UserProvider extends ChangeNotifier {
   }
 
   void updateFullName(TextEditingController controller) {
-    _fullNameController.text = controller.text.trim();
+    // _fullNameController.text = utf8.decode(utf8.encode(controller.text)).trim();
+     _fullNameController.text = controller.text.trim();
     print( controller.text.trim());
     notifyListeners();
   }
@@ -205,7 +208,7 @@ class _ProfilePage extends State<ProfilePage> {
                   child: _buildSection(
                     title: "Thông tin cá nhân",
                     children: [
-                      _buildDetailRow(context, "", userProvider.fullNameController.text, userProvider.fullNameController, "fullName"),
+                      _buildDetailRow(context, "", utf8.decode(userProvider.fullNameController.text.runes.toList()), userProvider.fullNameController, "fullName"),
                       _buildDetailRow(context, "Username", userProvider.user?.username ?? '', null, ""),
                       _buildDetailRow(context, "Email", userProvider.emailController.text, userProvider.emailController, "email"),
                       _buildDetailRow(context, "Số điện thoại", userProvider.phoneController.text, userProvider.phoneController, "phone"),
@@ -440,6 +443,11 @@ class _ProfilePage extends State<ProfilePage> {
 
   void _showEditDialog(BuildContext context, TextEditingController controller, String field) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    // Giải mã chuỗi UTF-8 nếu cần
+    String decodedText = utf8.decode(controller.text.runes.toList());
+
+    // Cập nhật lại controller với giá trị đã giải mã
+    controller.text = decodedText;
     showDialog(
       context: context,
       builder: (context) {

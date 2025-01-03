@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -96,7 +95,7 @@ class _PostPage extends State<PostPage> {
               color: themeProvider.textColor,
             ),
             const SizedBox(width: 10),
-            Text('Công khai', style: GoogleFonts.chewy(color: themeProvider.textColor)),
+            Text('Công khai', style: TextStyle(color: themeProvider.textColor)),
             Expanded(
               // Use Expanded to push the 'data' text to the end
               child: Row(
@@ -136,7 +135,7 @@ class _PostPage extends State<PostPage> {
                     ),
                     hintText: 'Chia sẻ cảm xúc của bạn!',
                   ),
-                  style: GoogleFonts.dynaPuff(color: themeProvider.textPost),
+                  style: TextStyle(color: themeProvider.textPost),
                   onChanged: (value) {
                     setState(() {
                       valueExist = _PostInput.text.trim().isNotEmpty;

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:social_network_project/models/Theme.dart';
@@ -106,8 +108,9 @@ class _FriendRequestPage extends State<FriendRequestPage> {
                               backgroundImage: NetworkImage(friend.userIdSend.image!), // Thêm avatar động từ dữ liệu
                             ),
                             const SizedBox(width: 8),
-                            Text( '${friend.userIdSend.fullName} đã gửi cho bạn lời mời kết bạn',
-                              style:  TextStyle(color: themeProvider.textColor),
+                            Text(
+                              '${utf8.decode(friend.userIdSend.fullName!.runes.toList())} đã gửi cho bạn lời mời kết bạn',
+                              style: TextStyle(color: themeProvider.textColor),
                             ),
                             IconButton(onPressed: ()=>acceptFriends(friend.id!,context), icon:const Icon(Icons.check, color: Colors.green,))
                           ],

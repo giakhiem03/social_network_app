@@ -1,12 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:provider/provider.dart';
 import 'package:social_network_project/models/DefaultAvatar.dart';
-import '../models/User.dart';
 import 'LoginPage.dart';
 import 'ProfilePage.dart';
 
@@ -54,9 +52,9 @@ class _DrawerPage extends State<DrawerPage> {
                     Icons.home,
                     color: Colors.orangeAccent,
                   ),
-                  title: Text('Trang chủ',
+                  title:const Text('Trang chủ',
                       style:
-                      GoogleFonts.dynaPuff(color: Colors.orangeAccent)),
+                      TextStyle(color: Colors.orangeAccent)),
                   onTap: () {
                     setState(() {
                       _selectedIndex = 0;
@@ -72,9 +70,9 @@ class _DrawerPage extends State<DrawerPage> {
                     Icons.notifications,
                     color: Colors.orangeAccent,
                   ),
-                  title: Text('Thông báo',
+                  title: const Text('Thông báo',
                       style:
-                      GoogleFonts.dynaPuff(color: Colors.orangeAccent)),
+                      TextStyle(color: Colors.orangeAccent)),
                   onTap: () {
                     setState(() {
                       _selectedIndex = 1;
@@ -93,9 +91,9 @@ class _DrawerPage extends State<DrawerPage> {
                     ),
                     child: Icon(FeatherIcons.messageCircle, color: Colors.orangeAccent), // Biểu tượng
                   ),
-                  title: Text('Tin nhắn',
+                  title:const Text('Tin nhắn',
                       style:
-                      GoogleFonts.dynaPuff(color: Colors.orangeAccent)),
+                      TextStyle(color: Colors.orangeAccent)),
                   onTap: () {
                     setState(() {
                       _selectedIndex = 2;
@@ -111,9 +109,9 @@ class _DrawerPage extends State<DrawerPage> {
                     Icons.people,
                     color: Colors.orangeAccent,
                   ),
-                  title: Text('Lời mời kết bạn',
+                  title:const Text('Lời mời kết bạn',
                       style:
-                      GoogleFonts.dynaPuff(color: Colors.orangeAccent)),
+                      TextStyle(color: Colors.orangeAccent)),
                   onTap: () {
                     setState(() {
                       _selectedIndex = 3;
@@ -129,9 +127,9 @@ class _DrawerPage extends State<DrawerPage> {
                     radius: 15,
                     backgroundImage: NetworkImage( user?.image ?? Images.defaultImage),
                   ),
-                  title: Text('Trang cá nhân',
+                  title:const Text('Trang cá nhân',
                       style:
-                      GoogleFonts.dynaPuff(color: Colors.orangeAccent)),
+                      TextStyle(color: Colors.orangeAccent)),
                   onTap: () {
                     setState(() {
                       _selectedIndex = 4;
@@ -147,9 +145,9 @@ class _DrawerPage extends State<DrawerPage> {
                     Icons.settings,
                     color: Colors.orangeAccent,
                   ),
-                  title: Text('Cài đặt',
+                  title:const Text('Cài đặt',
                       style:
-                      GoogleFonts.dynaPuff(color: Colors.orangeAccent)),
+                      TextStyle(color: Colors.orangeAccent)),
                   onTap: () {
                     setState(() {
                       _selectedIndex = 5;
@@ -165,9 +163,9 @@ class _DrawerPage extends State<DrawerPage> {
                     Icons.logout,
                     color: Colors.orangeAccent,
                   ),
-                  title: Text('Đăng xuất',
+                  title:const Text('Đăng xuất',
                       style:
-                      GoogleFonts.dynaPuff(color: Colors.orangeAccent)),
+                      TextStyle(color: Colors.orangeAccent)),
                   onTap: () {
                     user?.status=false;
                     _selectedIndex = 0;

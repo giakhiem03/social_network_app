@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -210,10 +211,25 @@ class HomeProvider extends ChangeNotifier {
 
 }
 
-class HomePage extends StatelessWidget {
-
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePage();
+
+}
+
+class _HomePage extends State<HomePage> {
+
+
+  @override
+  void initState() {
+    super.initState();
+    // Sử dụng addPostFrameCallback để gọi initialize sau khi widget đã được xây dựng
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<HomeProvider>(context, listen: false).initialize();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -223,6 +239,7 @@ class HomePage extends StatelessWidget {
 
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Consumer<HomeProvider>(builder: (context, homeProvider, child) {
+
       return Column(
         children: [
           Container(
@@ -313,8 +330,7 @@ class HomePage extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                        post.userUpLoad.fullName ??
-                                            post.userUpLoad.username,
+                                        utf8.decode(post.userUpLoad.fullName!.runes.toList()),
                                         style:
                                         TextStyle(color: themeProvider.textColor)),
                                     Text(post.postedTime,
@@ -325,8 +341,9 @@ class HomePage extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 18),
-                            Text('${post.caption}',
-                                style: TextStyle(color: themeProvider.textColor)),
+                            Text(utf8.decode(post.caption!.runes.toList()),
+                                // chuyển đổi thành đúng dạng
+                                style: TextStyle(color: themeProvider.textColor,)),
                             const SizedBox(height: 18),
                             post.postImage != null
                                 ? ClipRRect(
@@ -475,7 +492,7 @@ class HomePage extends StatelessWidget {
                                                         children: [
                                                           CircleAvatar(
                                                             radius: 18,
-                                                            backgroundImage: NetworkImage('${cmt.user.image}'),
+                                                            backgroundImage: NetworkImage(utf8.decode(cmt.user.image!.runes.toList())),
                                                           ),
                                                           const SizedBox(width: 12),
                                                           checkUrl(cmt.content)
@@ -485,7 +502,7 @@ class HomePage extends StatelessWidget {
                                                               children: [
                                                                 // Tên người dùng
                                                                 Text(
-                                                                  cmt.user.fullName ?? cmt.user.username,
+                                                                  utf8.decode(cmt.user.fullName!.runes.toList()),
                                                                   style: TextStyle(color: themeProvider.textColor, fontWeight: FontWeight.bold),
                                                                 ),
                                                                 const SizedBox(width: 10), // Tạo khoảng cách giữa tên người dùng và ảnh
@@ -507,7 +524,7 @@ class HomePage extends StatelessWidget {
                                                               children: [
                                                                 // Tên người dùng
                                                                 Text(
-                                                                  cmt.user.fullName ?? cmt.user.username,
+                                                                  utf8.decode(cmt.user.fullName!.runes.toList()),
                                                                   style: TextStyle(color: themeProvider.textColor, fontWeight: FontWeight.bold),
                                                                 ),
                                                                 const SizedBox(height: 2),

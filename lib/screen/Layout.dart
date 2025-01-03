@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:social_network_project/screen/DrawerPage.dart';
 import 'package:social_network_project/screen/ListSearchPage.dart';
@@ -101,7 +100,7 @@ class _Layout extends State<Layout> {
                         50), // Giữ góc bo tròn
                   ),
                 ),
-                style: GoogleFonts.dynaPuff(color: themeProvider.textColor),
+                style: TextStyle(color: themeProvider.textColor),
                 onChanged: searchInput,
             )
           ),

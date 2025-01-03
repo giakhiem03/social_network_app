@@ -24,7 +24,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ListTile(
             title: Text(
               'Mode (Dark / Light)',
-              style: TextStyle(color: themeProvider.textColor, fontSize: 18),
+              style: TextStyle(color: themeProvider.textColor, fontSize: 18 ),
             ),
             trailing: Switch(
               value: themeProvider.isDarkMode,
